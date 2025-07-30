@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Backend to online judge",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node backend/server.js",
     "dev": "nodemon backend/server.js"
