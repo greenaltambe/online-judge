@@ -79,13 +79,6 @@ export const login = asyncHandler(async (req, res) => {
 	}
 });
 
-// @desc    Logout user
-// @route   POST /api/auth/logout
-// @access  Public
-export const logout = asyncHandler(async (req, res) => {
-	res.json({ message: "Logout" });
-});
-
 // @desc    Get user
 // @route   GET /api/auth/user
 // @access  Private

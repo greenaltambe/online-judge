@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import Problem from "../models/problem.model.js";
+import Submission from "../models/submission.model.js";
 
 // @desc    Get all problems
 // @route   GET /api/problems
@@ -18,7 +19,12 @@ const getProblem = asyncHandler(async (req, res) => {
 		res.status(400);
 		throw new Error("Problem not found");
 	}
-	res.status(200).json({ problem });
+
+	const lastSubmission = await Submission.findOne({
+		user: req.user._id,
+		problem: problem.id,
+	}).sort({ createdAt: -1 });
+	res.status(200).json({ problem, lastSubmission });
 });
 
 // @desc    Set problem
