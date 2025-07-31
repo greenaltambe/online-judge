@@ -7,15 +7,11 @@ import User from "../models/user.model.js";
 // @route   POST /api/auth/register
 // @access  Public
 export const register = asyncHandler(async (req, res) => {
-	const { name, email, password, role } = req.body;
+	const { name, email, password, role = "user" } = req.body;
 
 	if (!name || !email || !password) {
 		res.status(400);
 		throw new Error("Please add all fields");
-	}
-
-	if (!role) {
-		role = "user";
 	}
 
 	// check if user exists
@@ -83,14 +79,9 @@ export const login = asyncHandler(async (req, res) => {
 // @route   GET /api/auth/user
 // @access  Private
 export const getUser = asyncHandler(async (req, res) => {
-	const { _id, name, email, role } = await User.findById(req.user.id); // check link 20 in auth.middleware.js => we set req.user to User without password
+	// check link 20 in auth.middleware.js => we set req.user to User without password
 
-	res.status(200).json({
-		id: _id,
-		name,
-		email,
-		role,
-	});
+	res.status(200).json(req.user);
 });
 
 // generate JWT
