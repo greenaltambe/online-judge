@@ -1,6 +1,5 @@
 import asyncHandler from "express-async-handler";
 import Problem from "../models/problem.model.js";
-import mongoose from "mongoose";
 
 // @desc    Get all problems
 // @route   GET /api/problems
