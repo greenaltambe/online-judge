@@ -1,3 +1,4 @@
+import "./styles/ProblemForm.css";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FaPenAlt } from "react-icons/fa";

@@ -1,0 +1,12 @@
+/* dashboard.css */
+.dashboard {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 2rem;
+}
+
+.dashboard h1 {
+	font-size: 2rem;
+	color: var(--fourth-color);
+	margin-bottom: 1.5rem;
+}

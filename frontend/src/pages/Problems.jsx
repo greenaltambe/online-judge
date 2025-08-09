@@ -1,3 +1,4 @@
+import "./styles/Problems.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -18,6 +19,7 @@ const Problems = () => {
 	useEffect(() => {
 		if (!user) {
 			navigate("/login");
+			return;
 		}
 
 		if (isError) {

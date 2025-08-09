@@ -20,7 +20,11 @@ const Dashboard = () => {
 		return <Spinner />;
 	}
 
-	return <>{user.role === "admin" ? <ProblemForm /> : <UserDashboard />}</>;
+	return (
+		<div className="dashboard">
+			{user.role === "admin" ? <ProblemForm /> : <UserDashboard />}
+		</div>
+	);
 };
 
 export default Dashboard;

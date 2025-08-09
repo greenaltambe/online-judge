@@ -1,0 +1,116 @@
+/*
+  Problems styles
+*/
+
+.problems {
+	max-width: 900px;
+	margin: 0 auto 3rem;
+	padding: 0 1.5rem;
+}
+
+.problems-header {
+	display: grid;
+	grid-template-columns: 3fr 1fr;
+	align-items: center;
+	gap: 1rem;
+	background-color: var(--fourth-color);
+	color: var(--primary-color);
+	padding: 1rem 2rem;
+	border-radius: 0.5rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	margin-bottom: 1rem;
+}
+
+/* Explicit alignment for header columns */
+.problems-header > div:first-child {
+	text-align: left;
+}
+
+.problems-header > div:last-child {
+	text-align: center;
+}
+
+/* Problem list items */
+.problem-list-item {
+	display: grid;
+	grid-template-columns: 3fr 1fr;
+	align-items: center;
+	gap: 1rem;
+	background-color: var(--background-card);
+	padding: 1.5rem 2rem;
+	border-radius: 0.5rem;
+	margin-bottom: 0.75rem;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	text-decoration: none;
+	color: inherit;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.problem-list-item:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.problem-list-item h3 {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--text-dark);
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-align: left; /* Ensure problem titles are left-aligned */
+}
+
+.problem-difficulty {
+	display: flex; /* Use flexbox to center content */
+	justify-content: center;
+	align-items: center;
+	padding: 0.3em 0.8em;
+	border-radius: 9999px;
+	font-size: 0.85rem;
+	font-weight: 700;
+	text-transform: capitalize;
+	min-width: 80px;
+}
+
+.easy {
+	background-color: #d1fae5; /* Green-50 */
+	color: #065f46; /* Green-800 */
+}
+
+.medium {
+	background-color: #fef3c7; /* Yellow-50 */
+	color: #b45309; /* Yellow-800 */
+}
+
+.hard {
+	background-color: #fee2e2; /* Red-50 */
+	color: #991b1b; /* Red-800 */
+}
+
+.no-problems-message {
+	color: var(--text-light);
+	font-size: 1.25rem;
+	margin-top: 2rem;
+	font-weight: 400;
+}
+
+/* Media Queries
+ */
+@media (max-width: 600px) {
+	.problems-header {
+		padding: 1rem 1.5rem;
+	}
+
+	.problem-list-item {
+		padding: 1rem 1.5rem;
+	}
+
+	.problem-list-item h3 {
+		font-size: 1rem;
+	}
+}

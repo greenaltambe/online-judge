@@ -1,0 +1,23 @@
+/* variables.css */
+:root {
+	--primary-color: #f2f9f1;
+	--secondary-color: #ddeedf;
+	--third-color: #b6cdbd;
+	--fourth-color: #5c715e;
+	--text-dark: #1a202c;
+	--text-light: #4a5568;
+	--accent-color: #6366f1;
+	--background-card: #ffffff;
+}
+
+/* Dark theme example */
+[data-theme="dark"] {
+	--primary-color: #1a202c;
+	--secondary-color: #2d3748;
+	--third-color: #4a5568;
+	--fourth-color: #a0aec0;
+	--text-dark: #e2e8f0;
+	--text-light: #cbd5e0;
+	--accent-color: #90cdf4;
+	--background-card: #2d3748;
+}

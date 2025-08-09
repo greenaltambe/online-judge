@@ -1,0 +1,120 @@
+/*
+	Global styles for the application
+*/
+
+/* Import Theme Variables */
+@import "./variables.css";
+
+/* App Layout */
+.App {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-color: var(--primary-color);
+	text-align: center;
+}
+
+/* 
+  Shared Headings
+ */
+.heading {
+	margin: 2rem 0;
+	font-size: 2.5rem;
+	color: var(--fourth-color);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.heading h1 {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	font-size: 2.5rem;
+	font-weight: 700;
+}
+
+.heading p {
+	font-size: 1.2rem;
+	color: var(--text-light);
+}
+
+/*
+  Buttons (Reusable)
+ */
+.btn {
+	display: inline-block;
+	background-color: var(--fourth-color);
+	color: var(--primary-color);
+	padding: 0.75rem 1.5rem;
+	border-radius: 0.5rem;
+	font-size: 1.05rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	transition: background-color 0.2s ease, transform 0.15s ease,
+		box-shadow 0.15s ease;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Softer shadow */
+	cursor: pointer;
+	border: none;
+}
+
+.btn:hover {
+	background-color: var(--accent-color);
+	transform: scale(1.03); /* Subtle scale instead of push */
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12); /* Slightly deeper but still soft */
+}
+
+.btn:active {
+	transform: scale(0.98);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-block {
+	width: 100%;
+	display: block;
+}
+
+/* 
+  Spinner (Global Loading Indicator)
+ */
+.spinner-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100px;
+}
+
+.spinner {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	border: 6px solid var(--secondary-color);
+	border-top-color: var(--fourth-color);
+	animation: spin 1s linear infinite;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/*
+  Media Queries (Global Tweaks)
+*/
+@media (max-width: 768px) {
+	.heading {
+		font-size: 2rem;
+	}
+
+	.heading h1 {
+		font-size: 2rem;
+	}
+
+	.heading p {
+		font-size: 1rem;
+	}
+}

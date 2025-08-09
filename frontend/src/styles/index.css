@@ -1,0 +1,32 @@
+/* index.css */
+/*
+* Global styles for the application
+* Font imports
+* Global typography
+* Basic styling for a, ul, buttons
+*/
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+@import "./variables.css";
+
+/* Reset */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body,
+#root {
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	font-family: "Inter", sans-serif;
+	background-color: var(--primary-color);
+	color: var(--text-dark);
+}
