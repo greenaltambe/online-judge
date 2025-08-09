@@ -2,12 +2,13 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000/api/auth/";
 
+// Register user
 const register = async (userData) => {
 	const response = await axios.post(API_URL + "register", userData);
 
 	if (response.data) {
 		console.log(response.data);
-		localStorage.setItem("user", JSON.stringify(response.data));
+		localStorage.setItem("user", JSON.stringify(response.data)); // store user in local storage
 	}
 
 	return response.data;
@@ -18,14 +19,14 @@ const login = async (userData) => {
 
 	if (response.data) {
 		console.log(response.data);
-		localStorage.setItem("user", JSON.stringify(response.data));
+		localStorage.setItem("user", JSON.stringify(response.data)); // store user in local storage
 	}
 
 	return response.data;
 };
 
 const logout = () => {
-	localStorage.removeItem("user");
+	localStorage.removeItem("user"); // remove user from local storage
 };
 
 const authService = {

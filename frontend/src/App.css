@@ -6,6 +6,7 @@
 	--text-dark: #1a202c;
 	--text-light: #4a5568;
 	--accent-color: #6366f1;
+	--background-card: #ffffff;
 }
 
 body {
@@ -27,6 +28,7 @@ body {
 	text-align: center;
 }
 
+/* --- Header --- */
 header {
 	background-color: var(--fourth-color);
 	color: var(--primary-color);
@@ -78,6 +80,7 @@ header {
 	color: var(--secondary-color);
 }
 
+/* --- Heading --- */
 .heading {
 	margin: 2rem 0;
 	font-size: 2.5rem;
@@ -101,12 +104,13 @@ header {
 	color: var(--text-light);
 }
 
+/* --- Forms & Inputs --- */
 .form {
 	width: 90%;
 	max-width: 500px;
 	margin: 0 auto 2rem;
 	padding: 2rem;
-	background-color: #ffffff;
+	background-color: var(--background-card);
 	border-radius: 0.8rem;
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 	display: flex;
@@ -116,9 +120,19 @@ header {
 
 .form-group {
 	margin-bottom: 1rem;
+	text-align: left; /* Aligns labels to the left */
 }
 
-.form-control {
+.form-group label {
+	display: block; /* Makes the label a block-level element */
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+	color: var(--text-dark);
+}
+
+.form-control,
+.form-group textarea,
+.form-group select {
 	width: 100%;
 	padding: 0.8rem 1rem;
 	border: 1px solid var(--third-color);
@@ -134,17 +148,25 @@ header {
 	opacity: 0.8;
 }
 
-.form-control:focus {
+.form-control:focus,
+.form-group textarea:focus,
+.form-group select:focus {
 	outline: none;
 	border-color: var(--accent-color);
 	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
+.form-group textarea {
+	resize: vertical;
+}
+
+/* --- Buttons --- */
 .btn {
 	display: inline-block;
 	background-color: var(--fourth-color);
 	color: var(--primary-color);
 	padding: 0.8rem 1.5rem;
+	border: none;
 	border-radius: 0.5rem;
 	font-size: 1.1rem;
 	font-weight: 600;
@@ -152,6 +174,7 @@ header {
 	letter-spacing: 0.05em;
 	transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
 	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
 }
 
 .btn:hover {
@@ -165,6 +188,34 @@ header {
 	display: block;
 }
 
+/* --- Spinner --- */
+.spinner-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100px;
+}
+
+.spinner {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	border: 6px solid var(--secondary-color);
+	border-top-color: var(--fourth-color);
+	animation: spin 1s linear infinite;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+/* --- Media Queries --- */
 @media (max-width: 768px) {
 	header {
 		flex-direction: column;
@@ -209,27 +260,91 @@ header {
 	}
 }
 
-.spinner-container {
-	display: flex;
-	justify-content: center;
+/* --- Problems List (New List Style) --- */
+.problems {
+	width: 90%;
+	max-width: 1200px;
+	margin: 2rem auto;
+	padding: 0;
+	text-align: left;
+	border-radius: 0.8rem;
+	overflow: hidden; /* Ensures borders and shadows look clean */
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+	background-color: var(--background-card);
+}
+
+.problems-header {
+	display: grid;
+	grid-template-columns: 1fr 150px; /* One column for title, one for difficulty */
+	gap: 1rem;
+	padding: 1rem 2rem;
+	font-weight: 600;
+	color: var(--text-light);
+	border-bottom: 1px solid var(--third-color);
+	background-color: var(--secondary-color);
+}
+
+.problem-list-item {
+	display: grid;
+	grid-template-columns: 1fr 150px;
 	align-items: center;
-	min-height: 100px;
+	gap: 1rem;
+	padding: 1rem 2rem;
+	border-bottom: 1px solid var(--third-color);
+	text-decoration: none;
+	color: inherit;
+	transition: background-color 0.2s ease-in-out;
 }
 
-.spinner {
-	border: 4px solid rgba(0, 0, 0, 0.1);
-	border-left-color: #3498db;
-	border-radius: 50%;
-	width: 40px;
-	height: 40px;
-	animation: spin 1s linear infinite;
+.problem-list-item:last-child {
+	border-bottom: none;
 }
 
-@keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
+.problem-list-item:hover {
+	background-color: var(--primary-color);
+}
+
+.problem-list-item h3 {
+	font-size: 1.2rem;
+	font-weight: 500;
+	margin: 0;
+	color: var(--text-dark);
+	transition: color 0.2s ease-in-out;
+}
+
+.problem-list-item:hover h3 {
+	color: var(--accent-color);
+}
+
+.problem-list-item .problem-difficulty {
+	font-size: 0.9rem;
+	font-weight: 500;
+	padding: 0.3rem 0.8rem;
+	border-radius: 9999px;
+	text-align: center;
+	justify-self: center; /* Center the difficulty pill */
+}
+
+/* Difficulty Colors */
+.problem-difficulty.easy {
+	background-color: #d1fae5;
+	color: #065f46;
+}
+
+.problem-difficulty.medium {
+	background-color: #fffbeb;
+	color: #92400e;
+}
+
+.problem-difficulty.hard {
+	background-color: #fee2e2;
+	color: #991b1b;
+}
+
+/* "No Problems" message styling */
+.problems .no-problems-message {
+	text-align: center;
+	color: var(--text-light);
+	font-size: 1.2rem;
+	padding: 2rem;
 }

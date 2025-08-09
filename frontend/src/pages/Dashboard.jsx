@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ProblemForm from "../components/ProblemForm";
+import UserDashboard from "../components/UserDashboard";
+import Spinner from "../components/Spinner";
 
 const Dashboard = () => {
 	const navigate = useNavigate();
@@ -13,7 +16,11 @@ const Dashboard = () => {
 		}
 	}, [user, navigate]);
 
-	return <div>Dashboard</div>;
+	if (!user) {
+		return <Spinner />;
+	}
+
+	return <>{user.role === "admin" ? <ProblemForm /> : <UserDashboard />}</>;
 };
 
 export default Dashboard;

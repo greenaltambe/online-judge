@@ -17,21 +17,22 @@ const Login = () => {
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	const { user, isLoading, isError, isSuccess, message } = useSelector(
+	const { isLoading, isError, isSuccess, message } = useSelector(
 		(state) => state.auth
 	);
 
 	useEffect(() => {
 		if (isError) {
 			toast.error(message);
+			dispatch(reset());
 		}
 
-		if (isSuccess || user) {
+		if (isSuccess) {
+			toast.success("You are now logged in");
+			dispatch(reset());
 			navigate("/");
 		}
-
-		dispatch(reset());
-	}, [user, isError, isSuccess, message, navigate, dispatch]);
+	}, [isError, isSuccess, message, navigate, dispatch]);
 
 	const onChange = (e) => {
 		setFormData((prevState) => ({
