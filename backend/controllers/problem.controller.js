@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Problem from "../models/problem.model.js";
 import Submission from "../models/submission.model.js";
+import axios from "axios";
 
 // @desc    Get all problems
 // @route   GET /api/problems
@@ -46,6 +47,11 @@ const setProblem = asyncHandler(async (req, res) => {
 		throw new Error("Please add a difficulty field");
 	}
 
+	if (!req.body.testCases) {
+		res.status(400);
+		throw new Error("Please add test cases");
+	}
+
 	console.log(
 		`New problem added: ${req.body.title} [${req.body.difficulty}]`
 	);
@@ -54,6 +60,7 @@ const setProblem = asyncHandler(async (req, res) => {
 		title: req.body.title,
 		description: req.body.description,
 		difficulty: req.body.difficulty,
+		testCases: req.body.testCases,
 	});
 
 	console.log(problem);
@@ -97,4 +104,75 @@ const deleteProblem = asyncHandler(async (req, res) => {
 	res.status(200).json({ message: "Problem removed" });
 });
 
-export { getProblems, getProblem, setProblem, updateProblem, deleteProblem };
+// @desc    Run solution
+// @route   POST /api/problems/run
+// @access  Private
+const runSolution = asyncHandler(async (req, res) => {
+	const { problemId, code, language } = req.body;
+
+	if (!problemId || !code || !language) {
+		res.status(400);
+		throw new Error(
+			"One or more fields are missing while submitting solution"
+		);
+	}
+
+	const problem = await Problem.findById(problemId);
+
+	if (!problem) {
+		res.status(400);
+		throw new Error("Problem not found while submitting solution");
+	}
+
+	const testCases = problem.testCases;
+
+	const response = [];
+
+	for (const testCase of testCases) {
+		const input = testCase.input;
+		const expectedOutput = testCase.expectedOutput;
+
+		const response_data = await axios.post("http://localhost:5010/run", {
+			code,
+			language,
+			input,
+		});
+
+		const output = response_data.data;
+
+		let passed = true;
+		if (output.output.trim() === expectedOutput.trim()) {
+			response.push({
+				input,
+				output: output.output.trim(),
+				passed: true,
+			});
+		} else {
+			response.push({
+				input,
+				output: output.output.trim(),
+				passed: false,
+			});
+			passed = false;
+		}
+
+		// await Submission.create({
+		// 	user: req.user._id,
+		// 	problem: problemId,
+		// 	input,
+		// 	output: output.output.trim(),
+		// 	passed: passed,
+		// });
+	}
+
+	res.status(200).json({ response });
+});
+
+export {
+	getProblems,
+	getProblem,
+	setProblem,
+	updateProblem,
+	deleteProblem,
+	runSolution,
+};
