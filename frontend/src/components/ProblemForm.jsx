@@ -11,8 +11,14 @@ function ProblemForm() {
 		title: "",
 		description: "",
 		difficulty: "",
+		testCases: [
+			{
+				input: "",
+				expectedOutput: "",
+			},
+		],
 	});
-	const { title, description, difficulty } = formData;
+	const { title, description, difficulty, testCases } = formData;
 	const { user } = useSelector((state) => state.auth);
 	const { isLoading, isError, isSuccess, message } = useSelector(
 		(state) => state.problems
@@ -46,7 +52,19 @@ function ProblemForm() {
 			return;
 		}
 
-		const problemData = { title, description, difficulty };
+		if (
+			testCases.length === 0 ||
+			testCases.some((testCase) => {
+				testCase.input === "" || testCase.expectedOutput === "";
+			})
+		) {
+			toast.error(
+				"Please fill in all test cases input and expected output"
+			);
+			return;
+		}
+
+		const problemData = { title, description, difficulty, testCases };
 
 		setHasSubmitted(true);
 		dispatch(createProblem(problemData));
@@ -55,6 +73,12 @@ function ProblemForm() {
 			title: "",
 			description: "",
 			difficulty: "",
+			testCases: [
+				{
+					input: "",
+					expectedOutput: "",
+				},
+			],
 		});
 	};
 
@@ -63,6 +87,25 @@ function ProblemForm() {
 			...prevState,
 			[e.target.id]: e.target.value,
 		}));
+	};
+
+	const handleTestCaseChange = (index, e) => {
+		const { name, value } = e.target;
+		const updatedTestCases = [...testCases];
+		updatedTestCases[index][name] = value;
+		setFormData({ ...formData, testCases: updatedTestCases });
+	};
+
+	const addTestCase = () => {
+		setFormData({
+			...formData,
+			testCases: [...testCases, { input: "", expectedOutput: "" }],
+		});
+	};
+
+	const removeTestCase = (index) => {
+		const updatedTestCases = testCases.filter((_, i) => i !== index);
+		setFormData({ ...formData, testCases: updatedTestCases });
 	};
 
 	if (isLoading) {
@@ -105,7 +148,6 @@ function ProblemForm() {
 							onChange={onChange}
 						></textarea>
 					</div>
-
 					<div className="form-group">
 						<label htmlFor="difficulty">Difficulty</label>
 						<select
@@ -120,6 +162,43 @@ function ProblemForm() {
 							<option value="medium">Medium</option>
 							<option value="hard">Hard</option>
 						</select>
+					</div>
+					<div className="form-group">
+						<label>Test Cases</label>
+						{testCases.map((tc, index) => (
+							<div key={index} className="testcase-row">
+								<textarea
+									name="input"
+									placeholder="Input"
+									value={tc.input}
+									onChange={(e) =>
+										handleTestCaseChange(index, e)
+									}
+								/>
+								<textarea
+									name="expectedOutput"
+									placeholder="Expected Output"
+									value={tc.expectedOutput}
+									onChange={(e) =>
+										handleTestCaseChange(index, e)
+									}
+								/>
+								<button
+									type="button"
+									onClick={() => removeTestCase(index)}
+									className="btn"
+								>
+									Remove
+								</button>
+							</div>
+						))}
+						<button
+							type="button"
+							onClick={addTestCase}
+							className="btn"
+						>
+							+ Add Test Case
+						</button>
 					</div>
 
 					<div className="form-group">

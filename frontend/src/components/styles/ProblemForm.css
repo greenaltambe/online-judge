@@ -99,3 +99,44 @@
 		padding: 1.2rem;
 	}
 }
+/* Test Case Row */
+.testcase-row {
+	display: flex;
+	gap: 0.6rem;
+	margin-bottom: 0.6rem;
+	align-items: flex-start; /* Align top when multiline */
+}
+
+/* Textareas inside test case row */
+.testcase-row textarea {
+	flex: 1;
+	padding: 0.6rem 0.8rem;
+	font-size: 0.95rem;
+	border: 1px solid var(--border-color, #ccc);
+	border-radius: 6px;
+	background-color: var(--secondary-color);
+	color: var(--text-dark);
+	min-height: 60px; /* shorter than normal description field */
+	resize: vertical;
+	overflow-y: auto;
+}
+
+/* Focus state consistent with form fields */
+.testcase-row textarea:focus {
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+	background-color: var(--secondary-color);
+}
+
+/* Remove button styles */
+.testcase-row .btn {
+	background: #e53e3e;
+	color: white;
+	padding: 0.5rem 0.8rem;
+	border-radius: 6px;
+	flex-shrink: 0;
+}
+
+.testcase-row .btn:hover {
+	background: #c53030;
+}
