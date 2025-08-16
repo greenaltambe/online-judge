@@ -2,6 +2,12 @@
   Problems styles
 */
 
+ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
 .problems {
 	max-width: 900px;
 	margin: 0 auto 3rem;

@@ -62,12 +62,25 @@ const runSolution = async (problemData, token) => {
 	return response.data;
 };
 
+const getSubmissions = async (id, token) => {
+	const config = {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	};
+
+	const response = await axios.get(API_URL + id + "/submissions", config);
+	console.log(response);
+	return response.data;
+};
+
 const problemService = {
 	getProblems,
 	createProblem,
 	deleteProblem,
 	getProblem,
 	runSolution,
+	getSubmissions,
 };
 
 export default problemService;

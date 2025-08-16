@@ -169,16 +169,33 @@ const runSolution = asyncHandler(async (req, res) => {
 			passed = false;
 		}
 
-		// await Submission.create({
-		// 	user: req.user._id,
-		// 	problem: problemId,
-		// 	input,
-		// 	output: output.output.trim(),
-		// 	passed: passed,
-		// });
+		const submission = await Submission.create({
+			user: req.user._id,
+			problem: problemId,
+			code: code,
+			language: language,
+			status: passed ? "accepted" : "rejected",
+		});
+
+		console.log(submission);
 	}
 
 	res.status(200).json({ response });
+});
+
+const getSubmissions = asyncHandler(async (req, res) => {
+	const problemId = req.params.id;
+
+	console.log(req.params.id);
+	console.log(problemId);
+
+	if (!problemId) {
+		res.status(400);
+		throw new Error("Problem not found");
+	}
+
+	const submissions = await Submission.find({ problem: problemId });
+	res.status(200).json({ submissions });
 });
 
 export {
@@ -188,4 +205,5 @@ export {
 	updateProblem,
 	deleteProblem,
 	runSolution,
+	getSubmissions,
 };

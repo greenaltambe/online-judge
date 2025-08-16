@@ -137,6 +137,15 @@ const Problem = () => {
 				</button>
 			</div>
 
+			<div className="submission-button">
+				<button
+					className="btn btn-submit"
+					onClick={() => navigate(`/${id}/submissions`)}
+				>
+					Submissions
+				</button>
+			</div>
+
 			{/* Run Results */}
 			{runResult && (
 				<div className="run-results-section">

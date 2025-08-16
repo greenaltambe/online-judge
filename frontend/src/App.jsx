@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Problems from "./pages/Problems";
 import Problem from "./pages/Problem";
+import Submissions from "./pages/Submissions";
 
 function App() {
 	return (
@@ -20,6 +21,7 @@ function App() {
 					<Route path="/register" element={<Register />} />
 					<Route path="/problems" element={<Problems />} />
 					<Route path="/problems/:id" element={<Problem />} />
+					<Route path="/:id/submissions" element={<Submissions />} />
 				</Routes>
 			</div>
 			<ToastContainer position="bottom-right" />
