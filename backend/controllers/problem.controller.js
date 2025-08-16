@@ -142,6 +142,16 @@ const runSolution = asyncHandler(async (req, res) => {
 		const output = response_data.data;
 
 		let passed = true;
+
+		if (output.error) {
+			response.push({
+				input,
+				output: output.error,
+				expectedOutput,
+				passed: false,
+			});
+			continue;
+		}
 		if (output.output.trim() === expectedOutput.trim()) {
 			response.push({
 				input,
