@@ -1,0 +1,4 @@
+/* Fix for CodeMirror text alignment */
+.cm-content {
+	text-align: left !important;
+}

@@ -1,5 +1,5 @@
 import "./styles/Problem.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useParams, useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
@@ -9,11 +9,15 @@ import {
 	deleteProblem,
 } from "../features/problem/problemSlice";
 import { toast } from "react-toastify";
+import CodeEditor from "../components/CodeEditor";
 
 const Problem = () => {
 	const { id } = useParams();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+
+	const [code, setCode] = useState("");
+	const [language, setLanguage] = useState("cpp");
 
 	const { user } = useSelector((state) => state.auth);
 	const { currentProblem, isLoading, isError, message } = useSelector(
@@ -59,13 +63,52 @@ const Problem = () => {
 				<p
 					className={`problem-difficulty ${currentProblem.problem.difficulty.toLowerCase()}`}
 				>
-					{currentProblem.difficulty}
+					{currentProblem.problem.difficulty}
 				</p>
 			</div>
 			<div className="problem-description">
 				<p>{currentProblem.problem.description}</p>
 			</div>
 
+			<div className="test-cases-section">
+				<h2>Example Test Cases</h2>
+				<ul className="test-cases-list">
+					{currentProblem.problem.testCases.map((testCase, index) => (
+						<li key={index} className="test-case-item">
+							<span className="test-case-label">
+								Test Case {index + 1}:
+							</span>
+							<div className="test-case-line">
+								<span className="test-case-label">Input:</span>
+								<code className="code-inline">
+									{testCase.input}
+								</code>
+							</div>
+							<div className="test-case-line">
+								<span className="test-case-label">
+									Expected Output:
+								</span>
+								<code className="code-inline">
+									{testCase.expectedOutput}
+								</code>
+							</div>
+						</li>
+					))}
+				</ul>
+			</div>
+
+			<div className="language-selector">
+				<select
+					value={language}
+					onChange={(e) => setLanguage(e.target.value)}
+				>
+					<option value="cpp">C++</option>
+					<option value="java">Java</option>
+					<option value="python">Python</option>
+				</select>
+			</div>
+
+			<CodeEditor code={code} setCode={setCode} language={language} />
 			{/* Admin Actions */}
 			{user && user.role === "admin" && (
 				<div className="admin-actions">

@@ -1,5 +1,5 @@
 /*
-	Global styles for the application
+  Global styles for the application
 */
 
 /* Import Theme Variables */
@@ -11,11 +11,9 @@
 	flex-direction: column;
 	min-height: 100vh;
 	background-color: var(--primary-color);
-	text-align: center;
 }
 
-/* 
-  Shared Headings
+/* Shared Headings
  */
 .heading {
 	margin: 2rem 0;
@@ -25,6 +23,8 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 0.5rem;
+	/* Add text-align here if you need to center the heading text itself */
+	text-align: center;
 }
 
 .heading h1 {
@@ -58,6 +58,7 @@
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Softer shadow */
 	cursor: pointer;
 	border: none;
+	/* Add text-align: center here if needed for buttons */
 }
 
 .btn:hover {
@@ -76,8 +77,7 @@
 	display: block;
 }
 
-/* 
-  Spinner (Global Loading Indicator)
+/* Spinner (Global Loading Indicator)
  */
 .spinner-container {
 	display: flex;
