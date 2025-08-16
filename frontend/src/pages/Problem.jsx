@@ -7,6 +7,7 @@ import {
 	getProblemById,
 	reset,
 	deleteProblem,
+	runSolution,
 } from "../features/problem/problemSlice";
 import { toast } from "react-toastify";
 import CodeEditor from "../components/CodeEditor";
@@ -20,14 +21,22 @@ const Problem = () => {
 	const [language, setLanguage] = useState("cpp");
 
 	const { user } = useSelector((state) => state.auth);
-	const { currentProblem, isLoading, isError, message } = useSelector(
-		(state) => state.problems
-	);
+	const { currentProblem, isLoading, isError, message, runResult } =
+		useSelector((state) => state.problems);
 
 	const handleClickDelete = () => {
 		dispatch(deleteProblem(id));
 		toast.success("Problem deleted");
 		navigate("/problems");
+	};
+
+	const handleRunSolution = () => {
+		const payload = {
+			problemId: id,
+			language: language,
+			code: code,
+		};
+		dispatch(runSolution(payload));
 	};
 
 	useEffect(() => {
@@ -119,6 +128,67 @@ const Problem = () => {
 					>
 						Delete
 					</button>
+				</div>
+			)}
+
+			<div className="problem-run">
+				<button className="btn btn-run" onClick={handleRunSolution}>
+					Run
+				</button>
+			</div>
+
+			{/* Run Results */}
+			{runResult && (
+				<div className="run-results-section">
+					<h2>Run Results</h2>
+					<ul className="run-results-list">
+						{runResult.response.map((res, index) => (
+							<li
+								key={index}
+								className={`run-result-item ${
+									res.passed ? "passed" : "failed"
+								}`}
+							>
+								<div className="run-result-header">
+									<span>Test Case {index + 1}</span>
+									<span
+										className={`status-badge ${
+											res.passed
+												? "status-pass"
+												: "status-fail"
+										}`}
+									>
+										{res.passed ? "Passed" : "Failed"}
+									</span>
+								</div>
+
+								<div className="run-result-line">
+									<span className="run-label">Input:</span>
+									<code className="code-inline">
+										{res.input}
+									</code>
+								</div>
+
+								<div className="run-result-line">
+									<span className="run-label">
+										Expected Output:
+									</span>
+									<code className="code-inline">
+										{res.expectedOutput}
+									</code>
+								</div>
+
+								<div className="run-result-line">
+									<span className="run-label">
+										Your Output:
+									</span>
+									<code className="code-inline">
+										{res.output}
+									</code>
+								</div>
+							</li>
+						))}
+					</ul>
 				</div>
 			)}
 		</div>

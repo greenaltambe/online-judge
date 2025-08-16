@@ -51,11 +51,23 @@ const deleteProblem = async (id, token) => {
 	return response.data;
 };
 
+const runSolution = async (problemData, token) => {
+	const config = {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	};
+
+	const response = await axios.post(API_URL + "run", problemData, config);
+	return response.data;
+};
+
 const problemService = {
 	getProblems,
 	createProblem,
 	deleteProblem,
 	getProblem,
+	runSolution,
 };
 
 export default problemService;

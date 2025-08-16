@@ -118,6 +118,7 @@ const runSolution = asyncHandler(async (req, res) => {
 	}
 
 	const problem = await Problem.findById(problemId);
+	console.log(problem);
 
 	if (!problem) {
 		res.status(400);
@@ -145,12 +146,14 @@ const runSolution = asyncHandler(async (req, res) => {
 			response.push({
 				input,
 				output: output.output.trim(),
+				expectedOutput,
 				passed: true,
 			});
 		} else {
 			response.push({
 				input,
 				output: output.output.trim(),
+				expectedOutput,
 				passed: false,
 			});
 			passed = false;

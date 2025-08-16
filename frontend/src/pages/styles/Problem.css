@@ -171,3 +171,84 @@
 	background: #c82333;
 	transform: translateY(-1px);
 }
+
+/* Run Results Section */
+.run-results-section {
+	background: var(--background-card);
+	padding: 1.5rem;
+	border-radius: 10px;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+	margin-top: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.run-results-section h2 {
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: var(--fourth-color);
+	margin-bottom: 0.5rem;
+}
+
+.run-results-list {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.run-result-item {
+	padding: 1rem;
+	border-radius: 8px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+	background: var(--secondary-color);
+}
+
+/* Passed/Failed highlight */
+.run-result-item.passed {
+	border-left: 6px solid #28a745;
+}
+.run-result-item.failed {
+	border-left: 6px solid #dc3545;
+}
+
+.run-result-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-weight: 600;
+	color: var(--text-dark);
+}
+
+.status-badge {
+	padding: 0.3rem 0.7rem;
+	border-radius: 12px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+.status-pass {
+	background: #d4edda;
+	color: #155724;
+}
+.status-fail {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.run-result-line {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.95rem;
+}
+
+.run-label {
+	font-weight: 600;
+	color: var(--text-dark);
+}
