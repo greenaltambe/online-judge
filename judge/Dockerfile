@@ -1,11 +1,15 @@
-FROM ubuntu:22.04
+FROM debian:12-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
   g++ \
-  python3 python3-pip \
-  openjdk-17-jdk \
+  python3 \
+  python3-pip \
+  openjdk-17-jdk-headless \
+  bash \
+  curl \
+  ca-certificates \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
