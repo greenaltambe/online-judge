@@ -26,6 +26,10 @@ app.post("/run", async (req, res) => {
 		errorMsg = error?.toString() || "Unknown error occurred";
 	}
 
+	if (errorMsg) {
+		console.error(errorMsg);
+	}
+
 	res.status(200).json({
 		output: output || null,
 		error: errorMsg || null,

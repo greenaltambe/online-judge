@@ -6,6 +6,7 @@ import {
 	updateProblem,
 	deleteProblem,
 	runSolution,
+	submitSolution,
 	getSubmissions,
 } from "../controllers/problem.controller.js";
 import { protect, adminOnly } from "../middleware/auth.middleware.js";
@@ -18,6 +19,7 @@ router.post("/", protect, adminOnly, setProblem);
 router.put("/:id", protect, adminOnly, updateProblem);
 router.delete("/:id", protect, adminOnly, deleteProblem);
 router.post("/run", protect, runSolution);
+router.post("/submit", protect, submitSolution);
 router.get("/:id/submissions", protect, getSubmissions);
 
 export default router;

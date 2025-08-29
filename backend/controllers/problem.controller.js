@@ -2,6 +2,14 @@ import asyncHandler from "express-async-handler";
 import Problem from "../models/problem.model.js";
 import Submission from "../models/submission.model.js";
 import axios from "axios";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import MinIOStorage from "../storage/MinIOStorage.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const storage = new MinIOStorage("problems");
 
 // @desc    Get all problems
 // @route   GET /api/problems
@@ -183,6 +191,106 @@ const runSolution = asyncHandler(async (req, res) => {
 	res.status(200).json({ response });
 });
 
+const streamToString = (stream) => {
+	let data = "";
+	return new Promise((resolve, reject) => {
+		stream
+			.setEncoding("utf8")
+			.on("data", (chunk) => {
+				data += chunk;
+			})
+			.on("error", reject)
+			.on("end", () => resolve(data));
+	});
+};
+
+// @desc    Submit solution
+// @route   POST /api/problems/submit
+// @access  Private
+const submitSolution = asyncHandler(async (req, res) => {
+	const { problemId, code, language } = req.body;
+
+	if (!problemId || !code || !language) {
+		res.status(400);
+		throw new Error(
+			"One or more fields are missing while submitting solution"
+		);
+	}
+
+	const problem = await Problem.findById(problemId);
+
+	if (!problem) {
+		res.status(400);
+		throw new Error("Problem not found while submitting solution");
+	}
+
+	const testCases = await storage.listTestCases(problemId);
+	const results = [];
+	let allPassed = true;
+
+	for (const tc of testCases) {
+		const inputContent = await storage.getInputContent(problemId, tc.input);
+		const expectedOutputContent = await storage.getOutputContent(
+			problemId,
+			tc.output
+		);
+
+		try {
+			const response_data = await axios.post(
+				"http://localhost:5010/run",
+				{
+					code,
+					language,
+					input: inputContent,
+				}
+			);
+
+			const actualOutput = response_data.data.output.trim();
+			const passed = actualOutput === expectedOutputContent.trim();
+
+			results.push({
+				input: inputContent,
+				output: actualOutput,
+				expectedOutput: expectedOutputContent.trim(),
+				passed,
+			});
+
+			if (!passed) {
+				allPassed = false;
+			}
+		} catch (error) {
+			console.error(
+				`Error running solution for problem ${problemId}:`,
+				error
+			);
+			results.push({
+				input: inputContent,
+				output: `Error: ${error.message}`,
+				expectedOutput: expectedOutputContent.trim(),
+				passed: false,
+			});
+			allPassed = false;
+			return;
+		}
+	}
+
+	const submission = await Submission.create({
+		user: req.user._id,
+		problem: problemId,
+		code: code,
+		language: language,
+		status: allPassed ? "accepted" : "rejected",
+	});
+
+	console.log(`Submission created:`, submission);
+
+	res.status(200).json({
+		status: allPassed ? "accepted" : "rejected",
+		results,
+		submissionId: submission._id,
+	});
+});
+
 const getSubmissions = asyncHandler(async (req, res) => {
 	const problemId = req.params.id;
 
@@ -205,5 +313,6 @@ export {
 	updateProblem,
 	deleteProblem,
 	runSolution,
+	submitSolution,
 	getSubmissions,
 };
