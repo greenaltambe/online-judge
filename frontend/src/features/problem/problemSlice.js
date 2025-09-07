@@ -11,6 +11,7 @@ const initialState = {
 	message: "",
 	runResult: null,
 	submissions: null,
+	submissionResult: null,
 };
 
 // Get problems
@@ -93,6 +94,24 @@ export const runSolution = createAsyncThunk(
 		try {
 			const token = thunkAPI.getState().auth.user.token;
 			return await problemService.runSolution(problemData, token);
+		} catch (error) {
+			const message =
+				(error.response &&
+					error.response.data &&
+					error.response.data.message) ||
+				error.message ||
+				error.toString();
+			return thunkAPI.rejectWithValue(message);
+		}
+	}
+);
+
+export const submitSolution = createAsyncThunk(
+	"problems/submit",
+	async (problemData, thunkAPI) => {
+		try {
+			const token = thunkAPI.getState().auth.user.token;
+			return await problemService.submitSolution(problemData, token);
 		} catch (error) {
 			const message =
 				(error.response &&
@@ -210,6 +229,20 @@ export const problemsSlice = createSlice({
 				state.isLoading = false;
 				state.isError = true;
 				state.message = action.payload;
+			})
+			.addCase(submitSolution.pending, (state) => {
+				state.isLoading = true;
+			})
+			.addCase(submitSolution.fulfilled, (state, action) => {
+				state.isLoading = false;
+				state.isSuccess = true;
+				state.submissionResult = action.payload;
+			})
+			.addCase(submitSolution.rejected, (state, action) => {
+				state.isLoading = false;
+				state.isError = true;
+				state.message = action.payload;
+				state.submissionResult = null;
 			});
 	},
 });

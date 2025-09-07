@@ -2,9 +2,9 @@ import {
 	S3Client,
 	GetObjectCommand,
 	ListObjectsV2Command,
+	PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import Storage from "./Storage.js"; // optional base class
-import { Readable } from "stream";
 
 class MinIOStorage extends Storage {
 	constructor(bucketName) {
@@ -58,9 +58,7 @@ class MinIOStorage extends Storage {
 		if (!response.Contents) {
 			return [];
 		}
-		const files = (response.Contents || []).map((f) =>
-			f.Key.split("/").pop()
-		);
+		const files = response.Contents.map((f) => f.Key.split("/").pop());
 
 		const testCases = [];
 		files.forEach((file) => {
@@ -74,6 +72,18 @@ class MinIOStorage extends Storage {
 		});
 		console.log(testCases);
 		return testCases;
+	}
+
+	async uploadFile(problemId, file, type, index) {
+		const key = `${problemId}/${type}_${index}.txt`;
+		const command = new PutObjectCommand({
+			Bucket: this.bucket,
+			Key: key,
+			Body: file.buffer,
+		});
+
+		await this.s3.send(command);
+		return key;
 	}
 }
 

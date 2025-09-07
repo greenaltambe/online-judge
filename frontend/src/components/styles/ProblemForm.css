@@ -1,14 +1,14 @@
-/* Problem Form Container */
+/* --- Problem Form Container --- */
 .form {
 	max-width: 600px;
 	margin: 2rem auto;
 	padding: 2rem;
-	background: var(--primary-color);
+	background: var(--background-card);
 	border-radius: 10px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Form Groups */
+/* --- Form Groups --- */
 .form-group {
 	display: flex;
 	flex-direction: column;
@@ -21,7 +21,7 @@
 	margin-bottom: 0.5rem;
 }
 
-/* Base styling for all form fields */
+/* --- Base styling for all form fields --- */
 .form-control,
 .form-group input[type="text"],
 .form-group textarea,
@@ -29,37 +29,36 @@
 	width: 100%;
 	padding: 0.8rem 1rem;
 	font-size: 1rem;
-	border: 1px solid var(--border-color, #ccc);
+	border: 1px solid var(--third-color);
 	border-radius: 6px;
-	background-color: var(--secondary-color); /* unified background */
+	background-color: var(--primary-color);
 	color: var(--text-dark);
 	outline: none;
 	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-/* Matching focus state */
+/* Matching focus state for all form fields */
 .form-control:focus,
 .form-group input[type="text"]:focus,
 .form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.testcase-row textarea:focus {
 	border-color: var(--accent-color);
-	box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-	background-color: var(
-		--secondary-color
-	); /* keep color consistent on focus */
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+	background-color: var(--secondary-color);
 }
 
-/* Textarea tweaks */
+/* --- Textarea tweaks --- */
 .form-group textarea {
 	resize: vertical;
 	min-height: 100px;
 }
 
-/* Submit Button */
+/* --- Submit Button --- */
 .btn-block {
 	width: 100%;
 	padding: 0.8rem;
-	background: var(--accent-color);
+	background: var(--fourth-color);
 	color: var(--primary-color);
 	font-weight: 600;
 	border: none;
@@ -69,11 +68,11 @@
 }
 
 .btn-block:hover {
-	background: var(--accent-hover);
+	background: #4a554a;
 	transform: translateY(-1px);
 }
 
-/* Heading Section */
+/* --- Heading Section --- */
 .heading {
 	text-align: center;
 	margin-bottom: 1.5rem;
@@ -81,7 +80,7 @@
 
 .heading h1 {
 	font-size: 1.8rem;
-	color: var(--fourth-color);
+	color: var(--text-dark);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -89,22 +88,23 @@
 }
 
 .heading p {
-	color: var(--text-muted);
+	color: var(--text-light);
 	margin-top: 0.3rem;
 }
 
-/* Mobile Responsive */
+/* --- Mobile Responsive --- */
 @media (max-width: 600px) {
 	.form {
 		padding: 1.2rem;
 	}
 }
-/* Test Case Row */
+
+/* --- Test Case Row --- */
 .testcase-row {
 	display: flex;
 	gap: 0.6rem;
 	margin-bottom: 0.6rem;
-	align-items: flex-start; /* Align top when multiline */
+	align-items: flex-start;
 }
 
 /* Textareas inside test case row */
@@ -112,20 +112,13 @@
 	flex: 1;
 	padding: 0.6rem 0.8rem;
 	font-size: 0.95rem;
-	border: 1px solid var(--border-color, #ccc);
+	border: 1px solid var(--third-color);
 	border-radius: 6px;
-	background-color: var(--secondary-color);
+	background-color: var(--primary-color);
 	color: var(--text-dark);
-	min-height: 60px; /* shorter than normal description field */
+	min-height: 60px;
 	resize: vertical;
 	overflow-y: auto;
-}
-
-/* Focus state consistent with form fields */
-.testcase-row textarea:focus {
-	border-color: var(--accent-color);
-	box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-	background-color: var(--secondary-color);
 }
 
 /* Remove button styles */
@@ -135,8 +128,73 @@
 	padding: 0.5rem 0.8rem;
 	border-radius: 6px;
 	flex-shrink: 0;
+	cursor: pointer;
+	border: none;
+	transition: background-color 0.2s ease-in-out;
 }
 
 .testcase-row .btn:hover {
 	background: #c53030;
+}
+
+/* --- File Upload Section --- */
+.file-upload-row {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 1rem;
+}
+
+.file-upload-row label {
+	font-weight: 500;
+	color: var(--text-dark);
+	margin-bottom: 0.4rem;
+}
+
+/* Custom upload button */
+.custom-file-label {
+	display: inline-block;
+	padding: 0.6rem 1.2rem;
+	background-color: var(--fourth-color);
+	color: var(--primary-color);
+	font-weight: 500;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+/* Hover & active states */
+.custom-file-label:hover {
+	background-color: #4a554a;
+}
+
+.custom-file-label:active {
+	transform: scale(0.97);
+}
+
+/* Hint text */
+.form-group .hint,
+.file-hint {
+	font-size: 0.9rem;
+	color: var(--text-light);
+	margin-top: 0.8rem;
+}
+
+/* File list display */
+.file-list {
+	margin-top: 0.5rem;
+	padding-left: 0;
+	list-style: none;
+}
+
+.file-list li {
+	background-color: var(--secondary-color);
+	border: 1px solid var(--third-color);
+	border-radius: 4px;
+	padding: 0.4rem 0.8rem;
+	margin-bottom: 0.4rem;
+	font-size: 0.9rem;
+	color: var(--text-dark);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }

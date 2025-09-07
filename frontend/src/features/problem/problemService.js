@@ -62,6 +62,17 @@ const runSolution = async (problemData, token) => {
 	return response.data;
 };
 
+const submitSolution = async (problemData, token) => {
+	const config = {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	};
+
+	const response = await axios.post(API_URL + "submit", problemData, config);
+	return response.data;
+};
+
 const getSubmissions = async (id, token) => {
 	const config = {
 		headers: {
@@ -80,6 +91,7 @@ const problemService = {
 	deleteProblem,
 	getProblem,
 	runSolution,
+	submitSolution,
 	getSubmissions,
 };
 

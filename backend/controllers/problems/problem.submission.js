@@ -58,19 +58,19 @@ const submitSolution = asyncHandler(async (req, res) => {
 
 			if (!passed) {
 				allPassed = false;
+				break;
 			}
 		} catch (error) {
 			console.error(
 				`Error running solution for problem ${problemId}:`,
-				error
+				error.message
 			);
-			results.push({
-				input: inputContent,
-				output: `Error: ${error.message}`,
-				expectedOutput: expectedOutputContent.trim(),
-				passed: false,
+			// Send a specific error response to the client
+			res.status(500).json({
+				message: "An error occurred while running your solution.",
+				error: error.message,
+				status: "error",
 			});
-			allPassed = false;
 			return;
 		}
 	}

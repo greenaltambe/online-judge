@@ -8,6 +8,7 @@ import {
 	reset,
 	deleteProblem,
 	runSolution,
+	submitSolution,
 } from "../features/problem/problemSlice";
 import { toast } from "react-toastify";
 import CodeEditor from "../components/CodeEditor";
@@ -21,8 +22,14 @@ const Problem = () => {
 	const [language, setLanguage] = useState("cpp");
 
 	const { user } = useSelector((state) => state.auth);
-	const { currentProblem, isLoading, isError, message, runResult } =
-		useSelector((state) => state.problems);
+	const {
+		currentProblem,
+		isLoading,
+		isError,
+		message,
+		runResult,
+		submissionResult,
+	} = useSelector((state) => state.problems);
 
 	const handleClickDelete = () => {
 		dispatch(deleteProblem(id));
@@ -39,6 +46,15 @@ const Problem = () => {
 		dispatch(runSolution(payload));
 	};
 
+	const handleSubmitSolution = () => {
+		const payload = {
+			problemId: id,
+			language: language,
+			code: code,
+		};
+
+		dispatch(submitSolution(payload));
+	};
 	useEffect(() => {
 		if (!user) {
 			navigate("/login");
@@ -137,6 +153,12 @@ const Problem = () => {
 				</button>
 			</div>
 
+			<div className="problem-submission">
+				<button className="btn btn-run" onClick={handleSubmitSolution}>
+					Submit
+				</button>
+			</div>
+
 			<div className="submission-button">
 				<button
 					className="btn btn-submit"
@@ -198,6 +220,35 @@ const Problem = () => {
 							</li>
 						))}
 					</ul>
+				</div>
+			)}
+			{/* Submit solution	*/}
+			{submissionResult && (
+				<div className="submission-results-section">
+					<h2>Submission Results</h2>
+
+					{submissionResult.status ? (
+						<>
+							<p>Status: {submissionResult.status}</p>
+							<ul>
+								{submissionResult.results?.map((r, i) => (
+									<li key={i}>
+										<strong>Input:</strong> {r.input} <br />
+										<strong>Output:</strong> {r.output}{" "}
+										<br />
+										<strong>Expected:</strong>{" "}
+										{r.expectedOutput} <br />
+										<strong>Passed:</strong>{" "}
+										{r.passed ? "✅" : "❌"}
+									</li>
+								))}
+							</ul>
+						</>
+					) : (
+						<p style={{ color: "red" }}>
+							Error: {submissionResult.message || "Unknown error"}
+						</p>
+					)}
 				</div>
 			)}
 		</div>

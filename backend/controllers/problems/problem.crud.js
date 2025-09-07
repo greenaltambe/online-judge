@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Problem from "../../models/problem.model.js";
 import Submission from "../../models/submission.model.js";
+import storage from "../../config/miniostorage.js";
 
 // @desc    Get all problems
 // @route   GET /api/problems
@@ -27,6 +28,26 @@ const getProblem = asyncHandler(async (req, res) => {
 	res.status(200).json({ problem, lastSubmission });
 });
 
+function getTestPairs(inputs, outputs) {
+	const pairs = [];
+
+	for (const input of inputs) {
+		const match = input.originalname.match(/input_(\d+)/);
+		if (!match) continue;
+
+		const id = match[1];
+		const output = outputs.find(
+			(o) => o.originalname === `output_${id}.txt`
+		);
+
+		if (output) {
+			pairs.push({ input, output, id });
+		}
+	}
+
+	return pairs;
+}
+
 // @desc    Set problem
 // @route   POST /api/problems
 // @access  Private
@@ -51,6 +72,33 @@ const setProblem = asyncHandler(async (req, res) => {
 		throw new Error("Please add test cases");
 	}
 
+	console.log("Step 1: starting problem creation");
+
+	let parsedTestCases;
+	console.log(JSON.parse(req.body.testCases));
+	try {
+		parsedTestCases = JSON.parse(req.body.testCases);
+	} catch (error) {
+		res.status(400);
+		throw new Error("Invalid test cases format");
+	}
+
+	const inputs = req.files.inputs || [];
+	const outputs = req.files.outputs || [];
+
+	if (inputs.length !== outputs.length) {
+		return res
+			.status(400)
+			.json({ message: "Mismatched input/output submission test files" });
+	}
+
+	const testPairs = getTestPairs(inputs, outputs);
+	if (testPairs.length !== inputs.length) {
+		return res.status(400).json({
+			message: "Mismatched number of test pairs",
+		});
+	}
+
 	console.log(
 		`New problem added: ${req.body.title} [${req.body.difficulty}]`
 	);
@@ -59,8 +107,13 @@ const setProblem = asyncHandler(async (req, res) => {
 		title: req.body.title,
 		description: req.body.description,
 		difficulty: req.body.difficulty,
-		testCases: req.body.testCases,
+		testCases: parsedTestCases,
 	});
+
+	for (const pair of testPairs) {
+		await storage.uploadFile(problem._id, pair.input, "input", pair.id);
+		await storage.uploadFile(problem._id, pair.output, "output", pair.id);
+	}
 
 	console.log(problem);
 	res.status(201).json({ problem });

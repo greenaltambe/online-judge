@@ -17,6 +17,8 @@ function ProblemForm() {
 				expectedOutput: "",
 			},
 		],
+		inputs: [],
+		outputs: [],
 	});
 	const { title, description, difficulty, testCases } = formData;
 	const { user } = useSelector((state) => state.auth);
@@ -54,9 +56,7 @@ function ProblemForm() {
 
 		if (
 			testCases.length === 0 ||
-			testCases.some((testCase) => {
-				testCase.input === "" || testCase.expectedOutput === "";
-			})
+			testCases.some((tc) => tc.input === "" || tc.expectedOutput === "")
 		) {
 			toast.error(
 				"Please fill in all test cases input and expected output"
@@ -64,21 +64,33 @@ function ProblemForm() {
 			return;
 		}
 
-		const problemData = { title, description, difficulty, testCases };
+		const formDataToSend = new FormData();
+		formDataToSend.append("title", title);
+		formDataToSend.append("description", description);
+		formDataToSend.append("difficulty", difficulty);
+		formDataToSend.append("testCases", JSON.stringify(testCases));
+
+		if (formData.inputs) {
+			formData.inputs.forEach((file) =>
+				formDataToSend.append("inputs", file)
+			);
+		}
+		if (formData.outputs) {
+			formData.outputs.forEach((file) =>
+				formDataToSend.append("outputs", file)
+			);
+		}
 
 		setHasSubmitted(true);
-		dispatch(createProblem(problemData));
+		dispatch(createProblem(formDataToSend)); // make sure slice handles FormData
 
 		setFormData({
 			title: "",
 			description: "",
 			difficulty: "",
-			testCases: [
-				{
-					input: "",
-					expectedOutput: "",
-				},
-			],
+			testCases: [{ input: "", expectedOutput: "" }],
+			inputs: [],
+			outputs: [],
 		});
 	};
 
@@ -200,7 +212,75 @@ function ProblemForm() {
 							+ Add Test Case
 						</button>
 					</div>
+					<div className="form-group">
+						<label>Submission Test Files</label>
+						<p className="hint">
+							Upload input and output files (e.g., input_1.txt and
+							output_1.txt)
+						</p>
 
+						<div className="file-upload-row">
+							<label htmlFor="inputs">Input Files</label>
+							<input
+								type="file"
+								id="inputs"
+								name="inputs"
+								multiple
+								accept=".txt"
+								style={{ display: "none" }} // hide default input
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										inputs: Array.from(e.target.files),
+									}))
+								}
+							/>
+							<label
+								htmlFor="inputs"
+								className="custom-file-label"
+							>
+								Upload Input Files
+							</label>
+							{formData.inputs?.length > 0 && (
+								<ul className="file-list">
+									{formData.inputs.map((file, idx) => (
+										<li key={idx}>{file.name}</li>
+									))}
+								</ul>
+							)}
+						</div>
+
+						<div className="file-upload-row">
+							<label htmlFor="outputs">Output Files</label>
+							<input
+								type="file"
+								id="outputs"
+								name="outputs"
+								multiple
+								accept=".txt"
+								style={{ display: "none" }} // hide default input
+								onChange={(e) =>
+									setFormData((prev) => ({
+										...prev,
+										outputs: Array.from(e.target.files),
+									}))
+								}
+							/>
+							<label
+								htmlFor="outputs"
+								className="custom-file-label"
+							>
+								Upload Output Files
+							</label>
+							{formData.outputs?.length > 0 && (
+								<ul className="file-list">
+									{formData.outputs.map((file, idx) => (
+										<li key={idx}>{file.name}</li>
+									))}
+								</ul>
+							)}
+						</div>
+					</div>
 					<div className="form-group">
 						<button type="submit" className="btn btn-block">
 							Create Problem
