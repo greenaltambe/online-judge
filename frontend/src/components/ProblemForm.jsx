@@ -1,5 +1,5 @@
 import "./styles/ProblemForm.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { FaPenAlt } from "react-icons/fa";
 import { createProblem, reset } from "../features/problem/problemSlice";
@@ -27,7 +27,6 @@ function ProblemForm() {
 	);
 
 	const dispatch = useDispatch();
-
 	const [hasSubmitted, setHasSubmitted] = useState(false);
 
 	useEffect(() => {
@@ -82,7 +81,7 @@ function ProblemForm() {
 		}
 
 		setHasSubmitted(true);
-		dispatch(createProblem(formDataToSend)); // make sure slice handles FormData
+		dispatch(createProblem(formDataToSend));
 
 		setFormData({
 			title: "",
@@ -129,14 +128,13 @@ function ProblemForm() {
 	}
 
 	return (
-		<>
+		<Fragment>
 			<section className="heading">
 				<h1>
 					<FaPenAlt /> Hi, {user && user.name}
 				</h1>
 				<p>Create a new problem</p>
 			</section>
-
 			<section className="form">
 				<form onSubmit={onSubmit}>
 					<div className="form-group">
@@ -186,6 +184,7 @@ function ProblemForm() {
 									onChange={(e) =>
 										handleTestCaseChange(index, e)
 									}
+									className="testcase-input"
 								/>
 								<textarea
 									name="expectedOutput"
@@ -194,11 +193,12 @@ function ProblemForm() {
 									onChange={(e) =>
 										handleTestCaseChange(index, e)
 									}
+									className="testcase-output"
 								/>
 								<button
 									type="button"
 									onClick={() => removeTestCase(index)}
-									className="btn"
+									className="btn-remove"
 								>
 									Remove
 								</button>
@@ -207,7 +207,7 @@ function ProblemForm() {
 						<button
 							type="button"
 							onClick={addTestCase}
-							className="btn"
+							className="btn-add-testcase"
 						>
 							+ Add Test Case
 						</button>
@@ -215,19 +215,21 @@ function ProblemForm() {
 					<div className="form-group">
 						<label>Submission Test Files</label>
 						<p className="hint">
-							Upload input and output files (e.g., input_1.txt and
-							output_1.txt)
+							Upload input and output files (e.g., `input_1.txt`
+							and `output_1.txt`)
 						</p>
 
 						<div className="file-upload-row">
-							<label htmlFor="inputs">Input Files</label>
+							<label htmlFor="inputs" className="file-label">
+								Input Files
+							</label>
 							<input
 								type="file"
 								id="inputs"
 								name="inputs"
 								multiple
 								accept=".txt"
-								style={{ display: "none" }} // hide default input
+								style={{ display: "none" }}
 								onChange={(e) =>
 									setFormData((prev) => ({
 										...prev,
@@ -237,7 +239,7 @@ function ProblemForm() {
 							/>
 							<label
 								htmlFor="inputs"
-								className="custom-file-label"
+								className="custom-file-button"
 							>
 								Upload Input Files
 							</label>
@@ -251,14 +253,16 @@ function ProblemForm() {
 						</div>
 
 						<div className="file-upload-row">
-							<label htmlFor="outputs">Output Files</label>
+							<label htmlFor="outputs" className="file-label">
+								Output Files
+							</label>
 							<input
 								type="file"
 								id="outputs"
 								name="outputs"
 								multiple
 								accept=".txt"
-								style={{ display: "none" }} // hide default input
+								style={{ display: "none" }}
 								onChange={(e) =>
 									setFormData((prev) => ({
 										...prev,
@@ -268,7 +272,7 @@ function ProblemForm() {
 							/>
 							<label
 								htmlFor="outputs"
-								className="custom-file-label"
+								className="custom-file-button"
 							>
 								Upload Output Files
 							</label>
@@ -282,13 +286,13 @@ function ProblemForm() {
 						</div>
 					</div>
 					<div className="form-group">
-						<button type="submit" className="btn btn-block">
+						<button type="submit" className="btn btn-primary">
 							Create Problem
 						</button>
 					</div>
 				</form>
 			</section>
-		</>
+		</Fragment>
 	);
 }
 

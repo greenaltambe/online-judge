@@ -1,4 +1,4 @@
-/* --- Problem Form Container --- */
+/* --- Problem Form General Styles --- */
 .form {
 	max-width: 600px;
 	margin: 2rem auto;
@@ -8,71 +8,6 @@
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* --- Form Groups --- */
-.form-group {
-	display: flex;
-	flex-direction: column;
-	margin-bottom: 1.4rem;
-}
-
-.form-group label {
-	font-weight: 600;
-	color: var(--text-dark);
-	margin-bottom: 0.5rem;
-}
-
-/* --- Base styling for all form fields --- */
-.form-control,
-.form-group input[type="text"],
-.form-group textarea,
-.form-group select {
-	width: 100%;
-	padding: 0.8rem 1rem;
-	font-size: 1rem;
-	border: 1px solid var(--third-color);
-	border-radius: 6px;
-	background-color: var(--primary-color);
-	color: var(--text-dark);
-	outline: none;
-	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-/* Matching focus state for all form fields */
-.form-control:focus,
-.form-group input[type="text"]:focus,
-.form-group textarea:focus,
-.form-group select:focus,
-.testcase-row textarea:focus {
-	border-color: var(--accent-color);
-	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-	background-color: var(--secondary-color);
-}
-
-/* --- Textarea tweaks --- */
-.form-group textarea {
-	resize: vertical;
-	min-height: 100px;
-}
-
-/* --- Submit Button --- */
-.btn-block {
-	width: 100%;
-	padding: 0.8rem;
-	background: var(--fourth-color);
-	color: var(--primary-color);
-	font-weight: 600;
-	border: none;
-	border-radius: 6px;
-	cursor: pointer;
-	transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-}
-
-.btn-block:hover {
-	background: #4a554a;
-	transform: translateY(-1px);
-}
-
-/* --- Heading Section --- */
 .heading {
 	text-align: center;
 	margin-bottom: 1.5rem;
@@ -92,37 +27,90 @@
 	margin-top: 0.3rem;
 }
 
-/* --- Mobile Responsive --- */
-@media (max-width: 600px) {
-	.form {
-		padding: 1.2rem;
-	}
-}
-
-/* --- Test Case Row --- */
-.testcase-row {
+.form-group {
 	display: flex;
-	gap: 0.6rem;
-	margin-bottom: 0.6rem;
-	align-items: flex-start;
+	flex-direction: column;
+	margin-bottom: 1.5rem;
 }
 
-/* Textareas inside test case row */
+.form-group label {
+	font-weight: 600;
+	color: var(--text-dark);
+	margin-bottom: 0.5rem;
+}
+
+.form-group .hint {
+	font-size: 0.9rem;
+	color: var(--text-light);
+	margin-top: 0.5rem;
+}
+
+/* --- Form Controls --- */
+.form-control,
+.form-group textarea,
 .testcase-row textarea {
-	flex: 1;
-	padding: 0.6rem 0.8rem;
-	font-size: 0.95rem;
+	width: 100%;
+	padding: 0.8rem 1rem;
+	font-size: 1rem;
 	border: 1px solid var(--third-color);
 	border-radius: 6px;
 	background-color: var(--primary-color);
 	color: var(--text-dark);
-	min-height: 60px;
-	resize: vertical;
-	overflow-y: auto;
+	outline: none;
+	transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+		background-color 0.2s;
 }
 
-/* Remove button styles */
-.testcase-row .btn {
+.form-control:focus,
+.form-group textarea:focus,
+.testcase-row textarea:focus {
+	border-color: var(--accent-color);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+	background-color: var(--secondary-color);
+}
+
+.form-group textarea {
+	resize: vertical;
+	min-height: 100px;
+}
+
+/* --- Buttons --- */
+.btn {
+	padding: 0.8rem 1.5rem;
+	font-weight: 600;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.btn-primary {
+	width: 100%;
+	background: var(--fourth-color);
+	color: var(--primary-color);
+}
+
+.btn-primary:hover {
+	background: #4a554a;
+	transform: translateY(-1px);
+}
+
+.btn-add-testcase {
+	background: var(--fourth-color);
+	color: var(--primary-color);
+	padding: 0.6rem 1rem;
+	margin-top: 0.5rem;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out;
+}
+
+.btn-add-testcase:hover {
+	background: #4a554a;
+}
+
+.btn-remove {
 	background: #e53e3e;
 	color: white;
 	padding: 0.5rem 0.8rem;
@@ -133,57 +121,60 @@
 	transition: background-color 0.2s ease-in-out;
 }
 
-.testcase-row .btn:hover {
+.btn-remove:hover {
 	background: #c53030;
+}
+
+/* --- Test Cases Section --- */
+.testcase-row {
+	display: flex;
+	gap: 0.8rem;
+	margin-bottom: 0.8rem;
+	align-items: flex-start;
+}
+
+.testcase-row .testcase-input,
+.testcase-row .testcase-output {
+	min-height: 60px;
+	resize: vertical;
 }
 
 /* --- File Upload Section --- */
 .file-upload-row {
 	display: flex;
 	flex-direction: column;
-	margin-bottom: 1rem;
+	margin-top: 1.5rem;
 }
 
-.file-upload-row label {
-	font-weight: 500;
+.file-label {
+	font-weight: 600;
 	color: var(--text-dark);
-	margin-bottom: 0.4rem;
+	margin-bottom: 0.5rem;
 }
 
-/* Custom upload button */
-.custom-file-label {
+.custom-file-button {
 	display: inline-block;
-	padding: 0.6rem 1.2rem;
+	padding: 0.8rem 1.2rem;
 	background-color: var(--fourth-color);
 	color: var(--primary-color);
 	font-weight: 500;
 	border-radius: 6px;
 	cursor: pointer;
 	transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+	text-align: center;
 }
 
-/* Hover & active states */
-.custom-file-label:hover {
+.custom-file-button:hover {
 	background-color: #4a554a;
 }
 
-.custom-file-label:active {
-	transform: scale(0.97);
-}
-
-/* Hint text */
-.form-group .hint,
-.file-hint {
-	font-size: 0.9rem;
-	color: var(--text-light);
-	margin-top: 0.8rem;
-}
-
-/* File list display */
 .file-list {
-	margin-top: 0.5rem;
+	margin-top: 0.8rem;
 	padding-left: 0;
 	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
 }
 
 .file-list li {
@@ -191,10 +182,17 @@
 	border: 1px solid var(--third-color);
 	border-radius: 4px;
 	padding: 0.4rem 0.8rem;
-	margin-bottom: 0.4rem;
 	font-size: 0.9rem;
 	color: var(--text-dark);
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 600px) {
+	.form {
+		padding: 1.2rem;
+	}
+	.testcase-row {
+		flex-direction: column;
+		gap: 0.6rem;
+	}
 }
