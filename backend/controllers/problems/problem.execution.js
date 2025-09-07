@@ -68,15 +68,15 @@ const runSolution = asyncHandler(async (req, res) => {
 			passed = false;
 		}
 
-		const submission = await Submission.create({
-			user: req.user._id,
-			problem: problemId,
-			code: code,
-			language: language,
-			status: passed ? "accepted" : "rejected",
-		});
+		// const submission = await Submission.create({
+		// 	user: req.user._id,
+		// 	problem: problemId,
+		// 	code: code,
+		// 	language: language,
+		// 	status: passed ? "accepted" : "rejected",
+		// });
 
-		console.log(submission);
+		// console.log(submission);
 	}
 
 	res.status(200).json({ response });

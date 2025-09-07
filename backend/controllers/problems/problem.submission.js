@@ -31,10 +31,12 @@ const submitSolution = asyncHandler(async (req, res) => {
 
 	for (const tc of testCases) {
 		const inputContent = await storage.getInputContent(problemId, tc.input);
+		console.log(inputContent);
 		const expectedOutputContent = await storage.getOutputContent(
 			problemId,
 			tc.output
 		);
+		console.log(inputContent);
 
 		try {
 			const response_data = await axios.post(
@@ -46,8 +48,24 @@ const submitSolution = asyncHandler(async (req, res) => {
 				}
 			);
 
-			const actualOutput = response_data.data.output.trim();
-			const passed = actualOutput === expectedOutputContent.trim();
+			const actualOutput = response_data.data?.output;
+			if (typeof actualOutput !== "string") {
+				console.error(
+					"Unexpected response from code runner:",
+					response_data.data
+				);
+				res.status(500).json({
+					message: "Code runner did not return valid output.",
+					error: response_data.data,
+					status: "error",
+				});
+				return;
+			}
+
+			const normalizedOutput = actualOutput.trim();
+			console.log("Actual output:", normalizedOutput);
+
+			const passed = normalizedOutput === expectedOutputContent.trim();
 
 			results.push({
 				input: inputContent,
