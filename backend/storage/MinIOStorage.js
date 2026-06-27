@@ -1,25 +1,20 @@
-import {
-	S3Client,
-	GetObjectCommand,
-	ListObjectsV2Command,
-	PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import Storage from "./Storage.js"; // optional base class
+import { S3Client, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import Storage from './Storage.js';
 
 class MinIOStorage extends Storage {
-	constructor(bucketName) {
-		super();
-		this.bucket = bucketName;
-		this.s3 = new S3Client({
-			region: "us-east-1", // MinIO ignores but required
-			endpoint: "http://localhost:9000", // your MinIO API endpoint
-			forcePathStyle: true, // required for MinIO
-			credentials: {
-				accessKeyId: "admin",
-				secretAccessKey: "password123",
-			},
-		});
-	}
+    constructor({ endpoint, accessKey, secretKey, bucket }) {
+        super();
+        this.bucket = bucket;
+        this.s3 = new S3Client({
+            region: 'us-east-1',
+            endpoint,
+            forcePathStyle: true,
+            credentials: {
+                accessKeyId: accessKey,
+                secretAccessKey: secretKey,
+            },
+        });
+    }
 
 	async getInputStream(problemId, inputFileName) {
 		const key = `${problemId}/${inputFileName}`;

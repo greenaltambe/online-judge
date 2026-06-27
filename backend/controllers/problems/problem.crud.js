@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Problem from "../../models/problem.model.js";
 import Submission from "../../models/submission.model.js";
-import storage from "../../config/miniostorage.js";
+import storage from "../../config/storage.js";
 
 // @desc    Get all problems
 // @route   GET /api/problems

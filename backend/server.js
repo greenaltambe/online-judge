@@ -1,13 +1,13 @@
 import express from "express";
 import colors from "colors";
-import dotenv from "dotenv";
 import errorHandler from "./middleware/error.middleware.js";
 import authRouter from "./routes/auth.routes.js";
 import problemsRouter from "./routes/problem.route.js";
 import connectDB from "./config/db.js";
 import cors from "cors";
+import { validateEnv } from './config/validateEnv.js';
 
-dotenv.config();
+validateEnv();
 connectDB();
 
 const PORT = process.env.PORT || 5000;

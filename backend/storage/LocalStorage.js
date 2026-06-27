@@ -1,43 +1,89 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
+import Storage from './Storage.js';
 
-class LocalStorage {
-	constructor(basePath) {
-		this.basePath = basePath;
-	}
+class LocalStorage extends Storage {
+    constructor(basePath) {
+        super();
+        this.basePath = basePath;
+        
+        // Ensure base directory exists
+        if (!fs.existsSync(basePath)) {
+            fs.mkdirSync(basePath, { recursive: true });
+        }
+    }
 
-	getInputStream(problemId, inputFileName) {
-		const inputPath = path.join(this.basePath, problemId, inputFileName);
-		if (!fs.existsSync(inputPath)) {
-			throw new Error(`Input file not found: ${inputPath}`);
-		}
-		return fs.createReadStream(inputPath, { encoding: "utf-8" });
-	}
+    async getInputContent(problemId, inputFileName) {
+        const inputPath = path.join(this.basePath, problemId, inputFileName);
+        if (!fs.existsSync(inputPath)) {
+            throw new Error(`Input file not found: ${inputPath}`);
+        }
+        return fs.readFileSync(inputPath, 'utf-8');
+    }
 
-	getOutputStream(problemId, outputFileName) {
-		const outputPath = path.join(this.basePath, problemId, outputFileName);
-		if (!fs.existsSync(outputPath)) {
-			throw new Error(`Output file not found: ${outputPath}`);
-		}
-		return fs.createReadStream(outputPath, { encoding: "utf-8" });
-	}
+    async getOutputContent(problemId, outputFileName) {
+        const outputPath = path.join(this.basePath, problemId, outputFileName);
+        if (!fs.existsSync(outputPath)) {
+            throw new Error(`Output file not found: ${outputPath}`);
+        }
+        return fs.readFileSync(outputPath, 'utf-8');
+    }
 
-	listTestCases(problemId) {
-		const problemPath = path.join(this.basePath, problemId);
-		if (!fs.existsSync(problemPath)) return [];
-		const files = fs.readdirSync(problemPath);
-		const testCases = [];
-		files.forEach((file) => {
-			if (file.startsWith("input_")) {
-				const num = file.match(/\d+/)[0];
-				const outputFile = `output_${num}.txt`;
-				if (files.includes(outputFile)) {
-					testCases.push({ input: file, output: outputFile });
-				}
-			}
-		});
-		return testCases;
-	}
+    async listTestCases(problemId) {
+        const problemPath = path.join(this.basePath, problemId);
+        if (!fs.existsSync(problemPath)) return [];
+        
+        const files = fs.readdirSync(problemPath);
+        const testCases = [];
+        
+        files.forEach(file => {
+            if (file.startsWith('input_')) {
+                const num = file.match(/\d+/)[0];
+                const outputFile = `output_${num}.txt`;
+                if (files.includes(outputFile)) {
+                    testCases.push({ input: file, output: outputFile });
+                }
+            }
+        });
+        
+        return testCases;
+    }
+
+    async uploadTestCase(problemId, inputFile, outputFile, index) {
+        const problemPath = path.join(this.basePath, problemId);
+        
+        if (!fs.existsSync(problemPath)) {
+            fs.mkdirSync(problemPath, { recursive: true });
+        }
+        
+        const inputPath = path.join(problemPath, `input_${index}.txt`);
+        const outputPath = path.join(problemPath, `output_${index}.txt`);
+        
+        fs.writeFileSync(inputPath, inputFile.buffer);
+        fs.writeFileSync(outputPath, outputFile.buffer);
+        
+        return { inputPath, outputPath };
+    }
+
+    async deleteTestCases(problemId) {
+        const problemPath = path.join(this.basePath, problemId);
+        if (fs.existsSync(problemPath)) {
+            fs.rmSync(problemPath, { recursive: true, force: true });
+        }
+    }
+
+    async isHealthy() {
+        try {
+            // Check if base path is writable
+            const testPath = path.join(this.basePath, '.health-check');
+            fs.writeFileSync(testPath, 'test');
+            fs.unlinkSync(testPath);
+            return true;
+        } catch (error) {
+            console.error('Local storage health check failed:', error.message);
+            return false;
+        }
+    }
 }
 
 export default LocalStorage;

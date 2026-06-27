@@ -5,9 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
-  },
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+},
   "author": "",
   "license": "ISC",
   "dependencies": {
