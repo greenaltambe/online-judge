@@ -1,24 +1,21 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getSubmissions } from "../features/problem/problemSlice";
+import { useSubmissionStore } from "../../stores/submissionStore";
 import { useParams } from "react-router-dom";
-import Spinner from "../components/Spinner";
-import CodeEditor from "../components/CodeEditor";
-import "./styles/Submissions.css";
+import Spinner from "../../components/Common/Spinner";
+import CodeEditor from "../../components/CodeEditor/CodeEditor";
+import { formatDate } from "../../utils/formatDate";
+import "./Submissions.css";
 
 const Submissions = () => {
 	const { id } = useParams();
-	const dispatch = useDispatch();
-	const { isLoading, isError, message, submissions } = useSelector(
-		(state) => state.problems
-	);
+	const { isLoading, isError, message, submissions, getSubmissions } = useSubmissionStore();
 
 	const [visibleCodes, setVisibleCodes] = useState({});
 
 	useEffect(() => {
 		if (isError) console.log(message);
-		dispatch(getSubmissions(id));
-	}, [isError, message, dispatch, id]);
+		getSubmissions(id);
+	}, [isError, message, id, getSubmissions]);
 
 	const toggleCode = (submissionId) => {
 		setVisibleCodes((prev) => ({
@@ -42,7 +39,7 @@ const Submissions = () => {
 								</span>
 								<span>
 									<strong>Created At:</strong>{" "}
-									{new Date(sub.createdAt).toLocaleString()}
+									{formatDate(sub.createdAt)}
 								</span>
 							</div>
 							<button

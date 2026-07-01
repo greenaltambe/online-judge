@@ -1,11 +1,10 @@
-import "./styles/Register.css";
+import "./Register.css";
 import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { FaUser } from "react-icons/fa";
-import { register, reset } from "../features/auth/authSlice";
-import Spinner from "../components/Spinner";
+import { useAuthStore } from "../../stores/authStore";
+import Spinner from "../../components/Common/Spinner";
 
 const Register = () => {
 	const [formData, setFormData] = useState({
@@ -18,26 +17,22 @@ const Register = () => {
 	const { name, email, password, confirmPassword } = formData;
 
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
-
-	const { isLoading, isError, isSuccess, message } = useSelector(
-		(state) => state.auth
-	);
+	const { register, reset, isLoading, isError, isSuccess, message } = useAuthStore();
 
 	useEffect(() => {
 		if (isError) {
 			toast.error(message);
-			dispatch(reset());
+			reset();
 		}
 
 		if (isSuccess) {
 			toast.success("You are now registered");
 			navigate("/");
-			dispatch(reset());
+			reset();
 		}
 
-		dispatch(reset());
-	}, [isError, isSuccess, message, navigate, dispatch]);
+		reset();
+	}, [isError, isSuccess, message, navigate, reset]);
 
 	const onChange = (e) => {
 		setFormData((prevState) => ({
@@ -58,7 +53,7 @@ const Register = () => {
 				password,
 			};
 
-			dispatch(register(userData));
+			register(userData);
 		}
 	};
 

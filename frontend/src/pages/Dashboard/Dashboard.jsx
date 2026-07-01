@@ -1,14 +1,15 @@
+import "./Dashboard.css";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import ProblemForm from "../components/ProblemForm";
-import UserDashboard from "../components/UserDashboard";
-import Spinner from "../components/Spinner";
+import { useAuthStore } from "../../stores/authStore";
+import ProblemForm from "../../components/ProblemForm/ProblemForm";
+import UserDashboard from "../../components/UserDashboard";
+import Spinner from "../../components/Common/Spinner";
 
 const Dashboard = () => {
 	const navigate = useNavigate();
 
-	const user = useSelector((state) => state.auth.user);
+	const user = useAuthStore((state) => state.user);
 
 	useEffect(() => {
 		if (!user) {

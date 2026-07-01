@@ -1,12 +1,12 @@
-import "./styles/Header.css";
+import "./Header.css";
 import { FaSignInAlt, FaSignOutAlt, FaUser, FaList } from "react-icons/fa";
 import { CiLight, CiDark } from "react-icons/ci";
 
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout, reset } from "../features/auth/authSlice";
-import { reset as resetProblems } from "../features/problem/problemSlice";
+import { useAuthStore } from "../../stores/authStore";
+import { useProblemStore } from "../../stores/problemStore";
+import { useSubmissionStore } from "../../stores/submissionStore";
 import { useEffect, useState } from "react";
 
 const Header = () => {
@@ -20,13 +20,14 @@ const Header = () => {
 	}, [theme]);
 
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
-	const { user } = useSelector((state) => state.auth);
+	const { user, logout } = useAuthStore();
+	const resetProblems = useProblemStore((state) => state.reset);
+	const resetSubmissions = useSubmissionStore((state) => state.reset);
 
 	const onLogOut = () => {
-		dispatch(logout());
-		dispatch(reset());
-		dispatch(resetProblems());
+		logout();
+		resetProblems();
+		resetSubmissions();
 		toast.success("Logged out successfully");
 		navigate("/");
 	};

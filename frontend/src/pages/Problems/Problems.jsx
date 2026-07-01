@@ -1,20 +1,17 @@
-import "./styles/Problems.css";
+import "./Problems.css";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import Spinner from "../components/Spinner";
+import Spinner from "../../components/Common/Spinner";
 import { FaList } from "react-icons/fa";
-import { getProblems, reset } from "../features/problem/problemSlice";
+import { useAuthStore } from "../../stores/authStore";
+import { useProblemStore } from "../../stores/problemStore";
 import { toast } from "react-toastify";
 
 const Problems = () => {
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
 
-	const user = useSelector((state) => state.auth.user);
-	const { problems, isError, isLoading, message } = useSelector(
-		(state) => state.problems
-	);
+	const user = useAuthStore((state) => state.user);
+	const { problems, getProblems, reset, isError, isLoading, message } = useProblemStore();
 
 	useEffect(() => {
 		if (!user) {
@@ -24,15 +21,15 @@ const Problems = () => {
 
 		if (isError) {
 			toast.error(message);
-			dispatch(reset());
+			reset();
 		}
 
-		dispatch(getProblems());
+		getProblems();
 
 		return () => {
-			dispatch(reset());
+			reset();
 		};
-	}, [user, navigate, isError, message, dispatch]);
+	}, [user, navigate, isError, message, getProblems, reset]);
 
 	if (isLoading) {
 		return <Spinner />;

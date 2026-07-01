@@ -10,7 +10,6 @@ const getProblems = async (token) => {
   };
 
   const response = await axios.get(API_URL, config);
-
   if (response.data) {
     console.log(response.data);
   }
@@ -51,48 +50,11 @@ const deleteProblem = async (id, token) => {
   return response.data;
 };
 
-const runSolution = async (problemData, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await axios.post(API_URL + "run", problemData, config);
-  return response.data;
-};
-
-const submitSolution = async (problemData, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await axios.post(API_URL + "submit", problemData, config);
-  return response.data;
-};
-
-const getSubmissions = async (id, token) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  const response = await axios.get(API_URL + id + "/submissions", config);
-  console.log(response);
-  return response.data;
-};
-
 const problemService = {
   getProblems,
+  getProblem,
   createProblem,
   deleteProblem,
-  getProblem,
-  runSolution,
-  submitSolution,
-  getSubmissions,
 };
 
 export default problemService;

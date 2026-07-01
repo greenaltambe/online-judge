@@ -1,10 +1,9 @@
-import "./styles/Login.css";
+import "./Login.css";
 import { useState, useEffect } from "react";
 import { FaSignInAlt } from "react-icons/fa";
-import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login, reset } from "../features/auth/authSlice";
-import Spinner from "../components/Spinner";
+import { useAuthStore } from "../../stores/authStore";
+import Spinner from "../../components/Common/Spinner";
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -16,24 +15,20 @@ const Login = () => {
 	const { email, password } = formData;
 
 	const navigate = useNavigate();
-	const dispatch = useDispatch();
-
-	const { isLoading, isError, isSuccess, message } = useSelector(
-		(state) => state.auth
-	);
+	const { login, reset, isLoading, isError, isSuccess, message } = useAuthStore();
 
 	useEffect(() => {
 		if (isError) {
 			toast.error(message);
-			dispatch(reset());
+			reset();
 		}
 
 		if (isSuccess) {
 			toast.success("You are now logged in");
-			dispatch(reset());
+			reset();
 			navigate("/");
 		}
-	}, [isError, isSuccess, message, navigate, dispatch]);
+	}, [isError, isSuccess, message, navigate, reset]);
 
 	const onChange = (e) => {
 		setFormData((prevState) => ({
@@ -50,7 +45,7 @@ const Login = () => {
 			password,
 		};
 
-		dispatch(login(userData));
+		login(userData);
 	};
 
 	if (isLoading) {

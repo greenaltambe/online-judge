@@ -3,8 +3,8 @@ import { cpp } from "@codemirror/lang-cpp";
 import { java } from "@codemirror/lang-java";
 import { python } from "@codemirror/lang-python";
 import { dracula } from "@uiw/codemirror-theme-dracula";
-// Import the autocompletion package
-import { autocompletion, CompletionContext } from "@codemirror/autocomplete";
+import { autocompletion } from "@codemirror/autocomplete";
+import "./CodeEditor.css";
 
 const CodeEditor = ({ code, setCode, language }) => {
 	const getLanguageExtension = (lang) => {
@@ -20,14 +20,10 @@ const CodeEditor = ({ code, setCode, language }) => {
 		}
 	};
 
-	// Define a simple completion source.
-	// In a real application, this would be much more sophisticated,
-	// potentially parsing the code or fetching suggestions from a language server.
 	const myCompletions = (context) => {
 		let word = context.matchBefore(/\w*/);
-		if (!word.from || word.from == word.to) return null; // No word to complete
+		if (!word.from || word.from == word.to) return null;
 
-		// Example suggestions based on the language
 		let options = [];
 		if (language === "cpp") {
 			options = [
@@ -56,7 +52,6 @@ const CodeEditor = ({ code, setCode, language }) => {
 			];
 		}
 
-		// Filter suggestions based on what the user has typed
 		const filteredOptions = options.filter((opt) =>
 			opt.label.startsWith(word.text)
 		);
@@ -72,7 +67,6 @@ const CodeEditor = ({ code, setCode, language }) => {
 			value={code}
 			width="100%"
 			height="500px"
-			// Combine the language extension with the autocompletion extension
 			extensions={[
 				getLanguageExtension(language),
 				autocompletion({ override: [myCompletions] }),
