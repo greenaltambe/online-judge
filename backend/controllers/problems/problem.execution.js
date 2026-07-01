@@ -7,79 +7,76 @@ import axios from "axios";
 // @route   POST /api/problems/run
 // @access  Private
 const runSolution = asyncHandler(async (req, res) => {
-	const { problemId, code, language } = req.body;
+  const { problemId, code, language } = req.body;
 
-	if (!problemId || !code || !language) {
-		res.status(400);
-		throw new Error(
-			"One or more fields are missing while submitting solution"
-		);
-	}
+  // Validate that all required fields are present
+  if (!problemId || !code || !language) {
+    res.status(400);
+    throw new Error("One or more fields are missing while submitting solution");
+  }
 
-	const problem = await Problem.findById(problemId);
-	console.log(problem);
+  // Fetch the problem from the database
+  const problem = await Problem.findById(problemId);
+  console.log(problem);
 
-	if (!problem) {
-		res.status(400);
-		throw new Error("Problem not found while submitting solution");
-	}
+  // Validate that the problem exists
+  if (!problem) {
+    res.status(400);
+    throw new Error("Problem not found while submitting solution");
+  }
 
-	const testCases = problem.testCases;
+  // Get the test cases for the problem (basic test cases)
+  const testCases = problem.testCases;
+  const response = [];
 
-	const response = [];
+  for (const testCase of testCases) {
+    const input = testCase.input;
+    const expectedOutput = testCase.expectedOutput;
 
-	for (const testCase of testCases) {
-		const input = testCase.input;
-		const expectedOutput = testCase.expectedOutput;
+    const response_data = await axios.post(
+      process.env.JUDGE_SERVICE_URL + `/run`,
+      {
+        code,
+        language,
+        input,
+      },
+    );
 
-		const response_data = await axios.post(process.env.JUDGE_SERVICE_URL + `/run`, {
-			code,
-			language,
-			input,
-		});
+    const output = response_data.data;
 
-		const output = response_data.data;
+    let passed = true;
 
-		let passed = true;
+    // Check if there was an error in the output
+    if (output.error) {
+      response.push({
+        input,
+        output: output.error,
+        expectedOutput,
+        passed: false,
+      });
+      continue;
+    }
 
-		if (output.error) {
-			response.push({
-				input,
-				output: output.error,
-				expectedOutput,
-				passed: false,
-			});
-			continue;
-		}
-		if (output.output.trim() === expectedOutput.trim()) {
-			response.push({
-				input,
-				output: output.output.trim(),
-				expectedOutput,
-				passed: true,
-			});
-		} else {
-			response.push({
-				input,
-				output: output.output.trim(),
-				expectedOutput,
-				passed: false,
-			});
-			passed = false;
-		}
+    // Compare the output with the expected output
+    if (output.output.trim() === expectedOutput.trim()) {
+      response.push({
+        input,
+        output: output.output.trim(),
+        expectedOutput,
+        passed: true,
+      });
+    } else {
+      response.push({
+        input,
+        output: output.output.trim(),
+        expectedOutput,
+        passed: false,
+      });
+      passed = false;
+    }
+  }
 
-		// const submission = await Submission.create({
-		// 	user: req.user._id,
-		// 	problem: problemId,
-		// 	code: code,
-		// 	language: language,
-		// 	status: passed ? "accepted" : "rejected",
-		// });
-
-		// console.log(submission);
-	}
-
-	res.status(200).json({ response });
+  res.status(200).json({ response });
 });
 
 export { runSolution };

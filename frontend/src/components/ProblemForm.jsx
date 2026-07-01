@@ -7,293 +7,289 @@ import { toast } from "react-toastify";
 import Spinner from "./Spinner";
 
 function ProblemForm() {
-	const [formData, setFormData] = useState({
-		title: "",
-		description: "",
-		difficulty: "",
-		testCases: [
-			{
-				input: "",
-				expectedOutput: "",
-			},
-		],
-		inputs: [],
-		outputs: [],
-	});
-	const { title, description, difficulty, testCases } = formData;
-	const { user } = useSelector((state) => state.auth);
-	const { isLoading, isError, isSuccess, message } = useSelector(
-		(state) => state.problems
-	);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    difficulty: "",
+    testCases: [
+      {
+        input: "",
+        expectedOutput: "",
+      },
+    ],
+    inputs: [],
+    outputs: [],
+  });
+  const { title, description, difficulty, testCases } = formData;
+  const { user } = useSelector((state) => state.auth);
+  const { isLoading, isError, isSuccess, message } = useSelector(
+    (state) => state.problems,
+  );
 
-	const dispatch = useDispatch();
-	const [hasSubmitted, setHasSubmitted] = useState(false);
+  const dispatch = useDispatch();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-	useEffect(() => {
-		if (hasSubmitted) {
-			if (isError) {
-				toast.error(message);
-				dispatch(reset());
-				setHasSubmitted(false);
-			}
+  useEffect(() => {
+    if (hasSubmitted) {
+      if (isError) {
+        toast.error(message);
+        dispatch(reset());
+        setHasSubmitted(false);
+      }
 
-			if (isSuccess) {
-				toast.success("Problem created");
-				dispatch(reset());
-				setHasSubmitted(false);
-			}
-		}
-	}, [isError, isSuccess, message, dispatch, hasSubmitted]);
+      if (isSuccess) {
+        toast.success("Problem created");
+        dispatch(reset());
+        setHasSubmitted(false);
+      }
+    }
+  }, [isError, isSuccess, message, dispatch, hasSubmitted]);
 
-	const onSubmit = (e) => {
-		e.preventDefault();
+  const onSubmit = (e) => {
+    e.preventDefault();
 
-		if (title === "" || description === "" || difficulty === "") {
-			toast.error("Please fill in all fields");
-			return;
-		}
+    if (title === "" || description === "" || difficulty === "") {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-		if (
-			testCases.length === 0 ||
-			testCases.some((tc) => tc.input === "" || tc.expectedOutput === "")
-		) {
-			toast.error(
-				"Please fill in all test cases input and expected output"
-			);
-			return;
-		}
+    if (
+      testCases.length === 0 ||
+      testCases.some((tc) => tc.input === "" || tc.expectedOutput === "")
+    ) {
+      toast.error("Please fill in all test cases input and expected output");
+      return;
+    }
 
-		const formDataToSend = new FormData();
-		formDataToSend.append("title", title);
-		formDataToSend.append("description", description);
-		formDataToSend.append("difficulty", difficulty);
-		formDataToSend.append("testCases", JSON.stringify(testCases));
+    console.log("inputs selected:", formData.inputs.length);
+    console.log(formData.inputs.map((f) => f.name));
 
-		if (formData.inputs) {
-			formData.inputs.forEach((file) =>
-				formDataToSend.append("inputs", file)
-			);
-		}
-		if (formData.outputs) {
-			formData.outputs.forEach((file) =>
-				formDataToSend.append("outputs", file)
-			);
-		}
+    console.log("outputs selected:", formData.outputs.length);
+    console.log(formData.outputs.map((f) => f.name));
 
-		setHasSubmitted(true);
-		dispatch(createProblem(formDataToSend));
+    const formDataToSend = new FormData();
+    formDataToSend.append("title", title);
+    formDataToSend.append("description", description);
+    formDataToSend.append("difficulty", difficulty);
+    formDataToSend.append("testCases", JSON.stringify(testCases));
 
-		setFormData({
-			title: "",
-			description: "",
-			difficulty: "",
-			testCases: [{ input: "", expectedOutput: "" }],
-			inputs: [],
-			outputs: [],
-		});
-	};
+    if (formData.inputs) {
+      formData.inputs.forEach((file) => formDataToSend.append("inputs", file));
+    }
+    if (formData.outputs) {
+      formData.outputs.forEach((file) =>
+        formDataToSend.append("outputs", file),
+      );
+    }
 
-	const onChange = (e) => {
-		setFormData((prevState) => ({
-			...prevState,
-			[e.target.id]: e.target.value,
-		}));
-	};
+    setHasSubmitted(true);
 
-	const handleTestCaseChange = (index, e) => {
-		const { name, value } = e.target;
-		const updatedTestCases = [...testCases];
-		updatedTestCases[index][name] = value;
-		setFormData({ ...formData, testCases: updatedTestCases });
-	};
+    for (const [key, value] of formDataToSend.entries()) {
+      console.log(key, value instanceof File ? value.name : value);
+    }
+    dispatch(createProblem(formDataToSend));
 
-	const addTestCase = () => {
-		setFormData({
-			...formData,
-			testCases: [...testCases, { input: "", expectedOutput: "" }],
-		});
-	};
+    setFormData({
+      title: "",
+      description: "",
+      difficulty: "",
+      testCases: [{ input: "", expectedOutput: "" }],
+      inputs: [],
+      outputs: [],
+    });
+  };
 
-	const removeTestCase = (index) => {
-		const updatedTestCases = testCases.filter((_, i) => i !== index);
-		setFormData({ ...formData, testCases: updatedTestCases });
-	};
+  const onChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.id]: e.target.value,
+    }));
+  };
 
-	if (isLoading) {
-		return <Spinner />;
-	}
+  const handleTestCaseChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedTestCases = [...testCases];
+    updatedTestCases[index][name] = value;
+    setFormData({ ...formData, testCases: updatedTestCases });
+  };
 
-	if (!user) {
-		return <Spinner />;
-	}
+  const addTestCase = () => {
+    setFormData({
+      ...formData,
+      testCases: [...testCases, { input: "", expectedOutput: "" }],
+    });
+  };
 
-	return (
-		<Fragment>
-			<section className="heading">
-				<h1>
-					<FaPenAlt /> Hi, {user && user.name}
-				</h1>
-				<p>Create a new problem</p>
-			</section>
-			<section className="form">
-				<form onSubmit={onSubmit}>
-					<div className="form-group">
-						<label htmlFor="title">Title</label>
-						<input
-							type="text"
-							className="form-control"
-							id="title"
-							name="title"
-							value={title}
-							onChange={onChange}
-						/>
-					</div>
-					<div className="form-group">
-						<label htmlFor="description">Description</label>
-						<textarea
-							name="description"
-							id="description"
-							rows="5"
-							value={description}
-							onChange={onChange}
-						></textarea>
-					</div>
-					<div className="form-group">
-						<label htmlFor="difficulty">Difficulty</label>
-						<select
-							name="difficulty"
-							id="difficulty"
-							value={difficulty}
-							onChange={onChange}
-							className="form-control"
-						>
-							<option value="">-- Select Difficulty --</option>
-							<option value="easy">Easy</option>
-							<option value="medium">Medium</option>
-							<option value="hard">Hard</option>
-						</select>
-					</div>
-					<div className="form-group">
-						<label>Test Cases</label>
-						{testCases.map((tc, index) => (
-							<div key={index} className="testcase-row">
-								<textarea
-									name="input"
-									placeholder="Input"
-									value={tc.input}
-									onChange={(e) =>
-										handleTestCaseChange(index, e)
-									}
-									className="testcase-input"
-								/>
-								<textarea
-									name="expectedOutput"
-									placeholder="Expected Output"
-									value={tc.expectedOutput}
-									onChange={(e) =>
-										handleTestCaseChange(index, e)
-									}
-									className="testcase-output"
-								/>
-								<button
-									type="button"
-									onClick={() => removeTestCase(index)}
-									className="btn-remove"
-								>
-									Remove
-								</button>
-							</div>
-						))}
-						<button
-							type="button"
-							onClick={addTestCase}
-							className="btn-add-testcase"
-						>
-							+ Add Test Case
-						</button>
-					</div>
-					<div className="form-group">
-						<label>Submission Test Files</label>
-						<p className="hint">
-							Upload input and output files (e.g., `input_1.txt`
-							and `output_1.txt`)
-						</p>
+  const removeTestCase = (index) => {
+    const updatedTestCases = testCases.filter((_, i) => i !== index);
+    setFormData({ ...formData, testCases: updatedTestCases });
+  };
 
-						<div className="file-upload-row">
-							<label htmlFor="inputs" className="file-label">
-								Input Files
-							</label>
-							<input
-								type="file"
-								id="inputs"
-								name="inputs"
-								multiple
-								accept=".txt"
-								style={{ display: "none" }}
-								onChange={(e) =>
-									setFormData((prev) => ({
-										...prev,
-										inputs: Array.from(e.target.files),
-									}))
-								}
-							/>
-							<label
-								htmlFor="inputs"
-								className="custom-file-button"
-							>
-								Upload Input Files
-							</label>
-							{formData.inputs?.length > 0 && (
-								<ul className="file-list">
-									{formData.inputs.map((file, idx) => (
-										<li key={idx}>{file.name}</li>
-									))}
-								</ul>
-							)}
-						</div>
+  if (isLoading) {
+    return <Spinner />;
+  }
 
-						<div className="file-upload-row">
-							<label htmlFor="outputs" className="file-label">
-								Output Files
-							</label>
-							<input
-								type="file"
-								id="outputs"
-								name="outputs"
-								multiple
-								accept=".txt"
-								style={{ display: "none" }}
-								onChange={(e) =>
-									setFormData((prev) => ({
-										...prev,
-										outputs: Array.from(e.target.files),
-									}))
-								}
-							/>
-							<label
-								htmlFor="outputs"
-								className="custom-file-button"
-							>
-								Upload Output Files
-							</label>
-							{formData.outputs?.length > 0 && (
-								<ul className="file-list">
-									{formData.outputs.map((file, idx) => (
-										<li key={idx}>{file.name}</li>
-									))}
-								</ul>
-							)}
-						</div>
-					</div>
-					<div className="form-group">
-						<button type="submit" className="btn btn-primary">
-							Create Problem
-						</button>
-					</div>
-				</form>
-			</section>
-		</Fragment>
-	);
+  if (!user) {
+    return <Spinner />;
+  }
+
+  return (
+    <Fragment>
+      <section className="heading">
+        <h1>
+          <FaPenAlt /> Hi, {user && user.name}
+        </h1>
+        <p>Create a new problem</p>
+      </section>
+      <section className="form">
+        <form onSubmit={onSubmit}>
+          <div className="form-group">
+            <label htmlFor="title">Title</label>
+            <input
+              type="text"
+              className="form-control"
+              id="title"
+              name="title"
+              value={title}
+              onChange={onChange}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea
+              name="description"
+              id="description"
+              rows="5"
+              value={description}
+              onChange={onChange}
+            ></textarea>
+          </div>
+          <div className="form-group">
+            <label htmlFor="difficulty">Difficulty</label>
+            <select
+              name="difficulty"
+              id="difficulty"
+              value={difficulty}
+              onChange={onChange}
+              className="form-control"
+            >
+              <option value="">-- Select Difficulty --</option>
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Test Cases</label>
+            {testCases.map((tc, index) => (
+              <div key={index} className="testcase-row">
+                <textarea
+                  name="input"
+                  placeholder="Input"
+                  value={tc.input}
+                  onChange={(e) => handleTestCaseChange(index, e)}
+                  className="testcase-input"
+                />
+                <textarea
+                  name="expectedOutput"
+                  placeholder="Expected Output"
+                  value={tc.expectedOutput}
+                  onChange={(e) => handleTestCaseChange(index, e)}
+                  className="testcase-output"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeTestCase(index)}
+                  className="btn-remove"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addTestCase}
+              className="btn-add-testcase"
+            >
+              + Add Test Case
+            </button>
+          </div>
+          <div className="form-group">
+            <label>Submission Test Files</label>
+            <p className="hint">
+              Upload input and output files (e.g., `input_1.txt` and
+              `output_1.txt`)
+            </p>
+
+            <div className="file-upload-row">
+              <label htmlFor="inputs" className="file-label">
+                Input Files
+              </label>
+              <input
+                type="file"
+                id="inputs"
+                name="inputs"
+                multiple
+                accept=".txt"
+                style={{ display: "none" }}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    inputs: Array.from(e.target.files),
+                  }))
+                }
+              />
+              <label htmlFor="inputs" className="custom-file-button">
+                Upload Input Files
+              </label>
+              {formData.inputs?.length > 0 && (
+                <ul className="file-list">
+                  {formData.inputs.map((file, idx) => (
+                    <li key={idx}>{file.name}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="file-upload-row">
+              <label htmlFor="outputs" className="file-label">
+                Output Files
+              </label>
+              <input
+                type="file"
+                id="outputs"
+                name="outputs"
+                multiple
+                accept=".txt"
+                style={{ display: "none" }}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    outputs: Array.from(e.target.files),
+                  }))
+                }
+              />
+              <label htmlFor="outputs" className="custom-file-button">
+                Upload Output Files
+              </label>
+              {formData.outputs?.length > 0 && (
+                <ul className="file-list">
+                  {formData.outputs.map((file, idx) => (
+                    <li key={idx}>{file.name}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+          <div className="form-group">
+            <button type="submit" className="btn btn-primary">
+              Create Problem
+            </button>
+          </div>
+        </form>
+      </section>
+    </Fragment>
+  );
 }
 
 export default ProblemForm;

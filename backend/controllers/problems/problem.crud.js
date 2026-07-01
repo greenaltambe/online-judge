@@ -31,12 +31,13 @@ const getProblem = asyncHandler(async (req, res) => {
 function getTestPairs(inputs, outputs) {
   const pairs = [];
 
+  // Match input and output files based on their naming convention
   for (const input of inputs) {
-    const match = input.originalname.match(/input_(\d+)/);
+    const match = input.originalname.match(/input_(\d+)/); // Extract the number from the input file name
     if (!match) continue;
 
     const id = match[1];
-    const output = outputs.find((o) => o.originalname === `output_${id}.txt`);
+    const output = outputs.find((o) => o.originalname === `output_${id}.txt`); // Find the corresponding output file
 
     if (output) {
       pairs.push({ input, output, id });
@@ -70,10 +71,7 @@ const setProblem = asyncHandler(async (req, res) => {
     throw new Error("Please add test cases");
   }
 
-  console.log("Step 1: starting problem creation");
-
   let parsedTestCases;
-  console.log(JSON.parse(req.body.testCases));
   try {
     parsedTestCases = JSON.parse(req.body.testCases);
   } catch (error) {
@@ -84,12 +82,20 @@ const setProblem = asyncHandler(async (req, res) => {
   const inputs = req.files.inputs || [];
   const outputs = req.files.outputs || [];
 
+  // Validate that there is at least one input and output file, and that they match in number
+  if (inputs.length === 0 || outputs.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Please upload both input and output test files" });
+  }
+
   if (inputs.length !== outputs.length) {
     return res
       .status(400)
       .json({ message: "Mismatched input/output submission test files" });
   }
 
+  // map input 1 with output 1, input 2 with output 2, etc. based on the naming convention
   const testPairs = getTestPairs(inputs, outputs);
   if (testPairs.length !== inputs.length) {
     return res.status(400).json({
@@ -107,12 +113,11 @@ const setProblem = asyncHandler(async (req, res) => {
   });
 
   for (const pair of testPairs) {
-    await storage.uploadTestCase(
-      (problemId = problem._id),
-      (inputFile = pair.input),
-      (outputFile = pair.output),
-      (index = pair.id),
-    );
+    console.log(pair);
+
+    await storage.uploadTestCase(problem._id, pair.input, pair.output, pair.id);
+
+    console.log("Uploaded testcase", pair.id);
   }
 
   console.log(problem);
@@ -152,7 +157,10 @@ const deleteProblem = asyncHandler(async (req, res) => {
     throw new Error("Problem not found");
   }
 
-  await problem.deleteOne();
+  await problem.deleteOne(); // This delete the problem from the database
+
+  // Delete the test cases from storage
+  await storage.deleteTestCases(problem._id); // This deletes the test cases from the storage
   res.status(200).json({ message: "Problem removed" });
 });
 

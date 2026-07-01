@@ -11,6 +11,7 @@ import storage from "./config/storage.js";
 validateEnv();
 connectDB();
 
+// Check if storage is healthy before starting the server
 const healthy = await storage.isHealthy();
 
 if (!healthy) {
@@ -21,14 +22,14 @@ if (!healthy) {
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
 
 app.use("/api/auth", authRouter); // for login, register, logout
-app.use("/api/problems", problemsRouter); // for all problems
+app.use("/api/problems", problemsRouter); // for all problems related routes
 
-app.use(errorHandler);
+app.use(errorHandler); // Custom error handling middleware
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
