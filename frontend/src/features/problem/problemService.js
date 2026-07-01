@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// const API_URL = "http://localhost:5000/api/problems/";
-const API_URL = "https://online-judge-1-mf6q.onrender.com/api/problems/";
+const API_URL = import.meta.env.VITE_API_URL + "/problems/";
 
 const getProblems = async (token) => {
   const config = {

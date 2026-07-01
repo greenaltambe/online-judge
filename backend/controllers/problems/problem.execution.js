@@ -32,7 +32,7 @@ const runSolution = asyncHandler(async (req, res) => {
 		const input = testCase.input;
 		const expectedOutput = testCase.expectedOutput;
 
-		const response_data = await axios.post("http://localhost:5010/run", {
+		const response_data = await axios.post(process.env.JUDGE_SERVICE_URL + `/run`, {
 			code,
 			language,
 			input,

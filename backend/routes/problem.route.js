@@ -21,8 +21,8 @@ router.post(
 	protect,
 	adminOnly,
 	upload.fields([
-		{ name: "inputs", maxCount: 10 },
-		{ name: "outputs", maxCount: 10 },
+		{ name: "inputs", maxCount: 20 },
+		{ name: "outputs", maxCount: 20 },
 	]),
 	setProblem
 );

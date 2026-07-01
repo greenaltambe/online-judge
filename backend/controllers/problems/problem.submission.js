@@ -40,7 +40,7 @@ const submitSolution = asyncHandler(async (req, res) => {
 
 		try {
 			const response_data = await axios.post(
-				"http://localhost:5010/run",
+				process.env.JUDGE_SERVICE_URL + `/run`,
 				{
 					code,
 					language,

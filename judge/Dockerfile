@@ -1,18 +1,16 @@
-FROM debian:12-slim
+FROM node:20-alpine
 
-ENV DEBIAN_FRONTEND=noninteractive
+RUN apk add --no-cache docker-cli
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  g++ \
-  python3 \
-  python3-pip \
-  openjdk-17-jdk-headless \
-  bash \
-  curl \
-  ca-certificates \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
 
-WORKDIR /code
+COPY package*.json ./
+RUN npm ci
 
-CMD ["bash"]
+COPY . .
+
+RUN mkdir -p temp && chmod 777 temp
+
+EXPOSE 5010
+
+CMD ["npm", "run", "dev"]

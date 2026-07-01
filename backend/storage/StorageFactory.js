@@ -1,35 +1,35 @@
-import LocalStorage from './LocalStorage.js';
-import MinIOStorage from './MinIOStorage.js';
-import S3Storage from './S3Storage.js';
+import LocalStorage from "./LocalStorage.js";
+import MinIOStorage from "./MinIOStorage.js";
+import S3Storage from "./S3Storage.js";
 
 class StorageFactory {
-    static create() {
-        const type = process.env.STORAGE_TYPE || 'local';
-        
-        switch (type) {
-            case 'local':
-                return new LocalStorage(process.env.STORAGE_BASE_PATH);
-            
-            case 'minio':
-                return new MinIOStorage({
-                    endpoint: process.env.MINIO_ENDPOINT,
-                    accessKey: process.env.MINIO_ACCESS_KEY,
-                    secretKey: process.env.MINIO_SECRET_KEY,
-                    bucket: process.env.MINIO_BUCKET,
-                });
-            
-            case 's3':
-                return new S3Storage({
-                    region: process.env.AWS_REGION,
-                    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-                    bucket: process.env.AWS_S3_BUCKET,
-                });
-            
-            default:
-                throw new Error(`Unknown storage type: ${type}`);
-        }
+  static create() {
+    switch (process.env.STORAGE_TYPE) {
+      case "local":
+        return new LocalStorage(process.env.STORAGE_BASE_PATH);
+
+      case "minio":
+        return new MinIOStorage({
+          endpoint: process.env.MINIO_ENDPOINT,
+          accessKey: process.env.MINIO_ACCESS_KEY,
+          secretKey: process.env.MINIO_SECRET_KEY,
+          bucket: process.env.MINIO_BUCKET,
+        });
+
+      case "s3":
+        return new S3Storage({
+          region: process.env.AWS_REGION,
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+          bucket: process.env.AWS_S3_BUCKET,
+        });
+
+      default:
+        throw new Error(
+          `Unsupported storage type: ${process.env.STORAGE_TYPE}`,
+        );
     }
+  }
 }
 
 export default StorageFactory;

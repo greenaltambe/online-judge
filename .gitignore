@@ -33,3 +33,15 @@ Thumbs.db
 backend/problems/*/
 judge/temp/
 *.tmp
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker volumes
+data/
+
+# Logs
+*.log
+logs/

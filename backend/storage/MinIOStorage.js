@@ -1,85 +1,117 @@
-import { S3Client, GetObjectCommand, ListObjectsV2Command, PutObjectCommand, DeleteObjectsCommand } from '@aws-sdk/client-s3';
-import Storage from './Storage.js';
+import {
+  S3Client,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  DeleteObjectsCommand,
+} from "@aws-sdk/client-s3";
+import Storage from "./Storage.js";
 
 class MinIOStorage extends Storage {
-    constructor({ endpoint, accessKey, secretKey, bucket }) {
-        super();
-        this.bucket = bucket;
-        this.s3 = new S3Client({
-            region: 'us-east-1',
-            endpoint,
-            forcePathStyle: true,
-            credentials: {
-                accessKeyId: accessKey,
-                secretAccessKey: secretKey,
-            },
-        });
+  constructor({ endpoint, accessKey, secretKey, bucket }) {
+    super();
+    this.bucket = bucket;
+    this.s3 = new S3Client({
+      region: "us-east-1",
+      endpoint,
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretKey,
+      },
+    });
+  }
+
+  async getInputContent(problemId, inputFileName) {
+    const key = `${problemId}/${inputFileName}`;
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const response = await this.s3.send(command);
+    return await response.Body.transformToString("utf-8");
+  }
+
+  async getOutputContent(problemId, outputFileName) {
+    const key = `${problemId}/${outputFileName}`;
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    const response = await this.s3.send(command);
+    return await response.Body.transformToString("utf-8");
+  }
+
+  async listTestCases(problemId) {
+    const command = new ListObjectsV2Command({
+      Bucket: this.bucket,
+      Prefix: `${problemId}/`,
+    });
+    const response = await this.s3.send(command);
+    if (!response.Contents) {
+      return [];
     }
+    const files = response.Contents.map((f) => f.Key.split("/").pop());
 
-	async getInputStream(problemId, inputFileName) {
-		const key = `${problemId}/${inputFileName}`;
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-		const response = await this.s3.send(command);
-		return response.Body; // stream
-	}
+    const testCases = [];
+    files.forEach((file) => {
+      if (file.startsWith("input_")) {
+        const num = file.match(/\d+/)[0];
+        const outputFile = `output_${num}.txt`;
+        if (files.includes(outputFile)) {
+          testCases.push({ input: file, output: outputFile });
+        }
+      }
+    });
+    console.log(testCases);
+    return testCases;
+  }
 
-	async getOutputStream(problemId, outputFileName) {
-		const key = `${problemId}/${outputFileName}`;
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-		const response = await this.s3.send(command);
-		return response.Body; // stream
-	}
+  async uploadTestCase(problemId, inputFile, outputFile, index) {
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: `${problemId}/input_${index}.txt`,
+        Body: inputFile.buffer,
+      }),
+    );
 
-	async getInputContent(problemId, inputFileName) {
-		const key = `${problemId}/${inputFileName}`;
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-		const response = await this.s3.send(command);
-		return await response.Body.transformToString("utf-8");
-	}
+    await this.s3.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: `${problemId}/output_${index}.txt`,
+        Body: outputFile.buffer,
+      }),
+    );
 
-	async getOutputContent(problemId, outputFileName) {
-		const key = `${problemId}/${outputFileName}`;
-		const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
-		const response = await this.s3.send(command);
-		return await response.Body.transformToString("utf-8");
-	}
+    return {
+      inputKey: `${problemId}/input_${index}.txt`,
+      outputKey: `${problemId}/output_${index}.txt`,
+    };
+  }
 
-	async listTestCases(problemId) {
-		const command = new ListObjectsV2Command({
-			Bucket: this.bucket,
-			Prefix: `${problemId}/`,
-		});
-		const response = await this.s3.send(command);
-		if (!response.Contents) {
-			return [];
-		}
-		const files = response.Contents.map((f) => f.Key.split("/").pop());
+  async deleteTestCases(problemId) {
+    const command = new ListObjectsV2Command({
+      Bucket: this.bucket,
+      Prefix: `${problemId}/`,
+    });
+    const response = await this.s3.send(command);
+    if (!response.Contents) {
+      return;
+    }
+    const objectsToDelete = response.Contents.map((f) => ({ Key: f.Key }));
+    const deleteCommand = new DeleteObjectsCommand({
+      Bucket: this.bucket,
+      Delete: { Objects: objectsToDelete },
+    });
+    await this.s3.send(deleteCommand);
+  }
 
-		const testCases = [];
-		files.forEach((file) => {
-			if (file.startsWith("input_")) {
-				const num = file.match(/\d+/)[0];
-				const outputFile = `output_${num}.txt`;
-				if (files.includes(outputFile)) {
-					testCases.push({ input: file, output: outputFile });
-				}
-			}
-		});
-		console.log(testCases);
-		return testCases;
-	}
-
-	async uploadFile(problemId, file, type, index) {
-		const key = `${problemId}/${type}_${index}.txt`;
-		const command = new PutObjectCommand({
-			Bucket: this.bucket,
-			Key: key,
-			Body: file.buffer,
-		});
-
-		await this.s3.send(command);
-		return key;
-	}
+  async isHealthy() {
+    try {
+      await this.s3.send(
+        new ListObjectsV2Command({ Bucket: this.bucket, MaxKeys: 1 }),
+      );
+      return true;
+    } catch (error) {
+      console.error("MinIO health check failed:", error);
+      return false;
+    }
+  }
 }
 
 export default MinIOStorage;
