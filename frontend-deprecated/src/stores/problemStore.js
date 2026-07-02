@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import api from "../lib/api";
+import problemService from "../services/problemService";
+import { useAuthStore } from "./authStore";
 
 export const useProblemStore = create((set) => ({
   problems: [],
@@ -10,10 +11,12 @@ export const useProblemStore = create((set) => ({
   message: "",
 
   getProblems: async () => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.get("/problems");
-      set({ problems: response.data.problems || [], isLoading: false, isSuccess: true });
+      const data = await problemService.getProblems(token);
+      set({ problems: data.problems || [], isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
         (error.response &&
@@ -26,10 +29,12 @@ export const useProblemStore = create((set) => ({
   },
 
   getProblemById: async (id) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.get(`/problems/${id}`);
-      set({ currentProblem: response.data, isLoading: false, isSuccess: true });
+      const data = await problemService.getProblem(id, token);
+      set({ currentProblem: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
         (error.response &&
@@ -41,41 +46,14 @@ export const useProblemStore = create((set) => ({
     }
   },
 
-  createProblem: async (formData) => {
+  createProblem: async (problemData) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.post("/problems", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const data = await problemService.createProblem(problemData, token);
       set((state) => ({
-        problems: [...state.problems, response.data.problem],
-        isLoading: false,
-        isSuccess: true,
-      }));
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      set({ isLoading: false, isError: true, message });
-    }
-  },
-
-  updateProblem: async (id, problemData) => {
-    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
-    try {
-      const response = await api.put(`/problems/${id}`, problemData);
-      set((state) => ({
-        problems: state.problems.map((prob) =>
-          prob._id === id ? response.data.problem : prob
-        ),
-        currentProblem: state.currentProblem && state.currentProblem.problem._id === id 
-          ? { ...state.currentProblem, problem: response.data.problem } 
-          : state.currentProblem,
+        problems: [...state.problems, data],
         isLoading: false,
         isSuccess: true,
       }));
@@ -91,11 +69,13 @@ export const useProblemStore = create((set) => ({
   },
 
   deleteProblem: async (id) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      await api.delete(`/problems/${id}`);
+      await problemService.deleteProblem(id, token);
       set((state) => ({
-        problems: state.problems.filter((prob) => prob._id !== id),
+        problems: state.problems.filter((problem) => problem._id !== id),
         isLoading: false,
         isSuccess: true,
       }));

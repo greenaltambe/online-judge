@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import api from "../lib/api";
+import submissionService from "../services/submissionService";
+import { useAuthStore } from "./authStore";
 
 export const useSubmissionStore = create((set) => ({
   runResult: null,
@@ -10,11 +11,13 @@ export const useSubmissionStore = create((set) => ({
   isSuccess: false,
   message: "",
 
-  runSolution: async (payload) => {
-    set({ isLoading: true, isError: false, isSuccess: false, message: "", runResult: null });
+  runSolution: async (problemData) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.post("/problems/run", payload);
-      set({ runResult: response.data, isLoading: false, isSuccess: true });
+      const data = await submissionService.runSolution(problemData, token);
+      set({ runResult: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
         (error.response &&
@@ -26,11 +29,13 @@ export const useSubmissionStore = create((set) => ({
     }
   },
 
-  submitSolution: async (payload) => {
-    set({ isLoading: true, isError: false, isSuccess: false, message: "", submissionResult: null });
+  submitSolution: async (problemData) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.post("/problems/submit", payload);
-      set({ submissionResult: response.data, isLoading: false, isSuccess: true });
+      const data = await submissionService.submitSolution(problemData, token);
+      set({ submissionResult: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
         (error.response &&
@@ -43,10 +48,12 @@ export const useSubmissionStore = create((set) => ({
   },
 
   getSubmissions: async (id) => {
+    const token = useAuthStore.getState().user?.token;
+    if (!token) return;
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.get(`/problems/${id}/submissions`);
-      set({ submissions: response.data.submissions || [], isLoading: false, isSuccess: true });
+      const data = await submissionService.getSubmissions(id, token);
+      set({ submissions: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
         (error.response &&

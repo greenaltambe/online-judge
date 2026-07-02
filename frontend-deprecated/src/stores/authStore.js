@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import api from "../lib/api";
+import authService from "../services/authService";
 
 export const useAuthStore = create((set) => ({
   user: JSON.parse(localStorage.getItem("user")) || null,
@@ -11,11 +11,7 @@ export const useAuthStore = create((set) => ({
   login: async (userData) => {
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.post("/auth/login", userData);
-      const data = response.data;
-      if (data) {
-        localStorage.setItem("user", JSON.stringify(data));
-      }
+      const data = await authService.login(userData);
       set({ user: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
@@ -31,11 +27,7 @@ export const useAuthStore = create((set) => ({
   register: async (userData) => {
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.post("/auth/register", userData);
-      const data = response.data;
-      if (data) {
-        localStorage.setItem("user", JSON.stringify(data));
-      }
+      const data = await authService.register(userData);
       set({ user: data, isLoading: false, isSuccess: true });
     } catch (error) {
       const message =
@@ -49,7 +41,7 @@ export const useAuthStore = create((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("user");
+    authService.logout();
     set({ user: null, isError: false, isSuccess: false, isLoading: false, message: "" });
   },
 
