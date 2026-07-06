@@ -1,8 +1,31 @@
-import { AppShell, Group, Button, Text, Menu, Avatar, Badge, Box, Burger, Stack, ActionIcon, useMantineColorScheme, UnstyledButton, Container } from "@mantine/core";
+import {
+  AppShell,
+  Group,
+  Button,
+  Text,
+  Menu,
+  Avatar,
+  Badge,
+  Box,
+  Burger,
+  Stack,
+  ActionIcon,
+  useMantineColorScheme,
+  UnstyledButton,
+  Container,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../stores/authStore";
-import { IconLogout, IconTerminal2, IconChevronDown, IconPlus, IconList, IconSun, IconMoon } from "@tabler/icons-react";
+import {
+  IconLogout,
+  IconTerminal2,
+  IconChevronDown,
+  IconPlus,
+  IconList,
+  IconSun,
+  IconMoon,
+} from "@tabler/icons-react";
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
@@ -17,7 +40,7 @@ const Layout = ({ children }) => {
   };
 
   const isDark = colorScheme === "dark";
-  
+
   // Safe helper bindings for user settings to avoid TypeError crashes from stale/malformed session data
   const displayName = user?.name || user?.email?.split("@")[0] || "User";
   const displayEmail = user?.email || "";
@@ -43,8 +66,13 @@ const Layout = ({ children }) => {
       <AppShell.Header px="md">
         <Group justify="between" h="100%">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          
-          <Group component={Link} to="/" style={{ textDecoration: "none", color: "inherit" }} gap="xs">
+
+          <Group
+            component={Link}
+            to="/"
+            style={{ textDecoration: "none", color: "inherit" }}
+            gap="xs"
+          >
             <Avatar variant="filled" color="blue" radius="sm" size="sm">
               <IconTerminal2 size={18} />
             </Avatar>
@@ -53,18 +81,42 @@ const Layout = ({ children }) => {
             </Text>
           </Group>
 
-          <ActionIcon variant="default" onClick={() => toggleColorScheme()} size="lg" aria-label="Toggle color scheme">
+          <ActionIcon
+            variant="default"
+            onClick={() => toggleColorScheme()}
+            size="lg"
+            aria-label="Toggle color scheme"
+          >
             {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
           </ActionIcon>
         </Group>
       </AppShell.Header>
 
       {/* Sidebar Navbar */}
-      <AppShell.Navbar p="md" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <AppShell.Navbar
+        p="md"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <Stack gap="md" style={{ flexGrow: 1 }}>
           {/* Logo & Theme Toggle Row */}
-          <Group justify="between" pb="md" style={{ borderBottom: "1px solid var(--mantine-color-default-border)" }}>
-            <Group component={Link} to="/" onClick={close} style={{ textDecoration: "none", color: "inherit" }} gap="xs">
+          <Group
+            justify="between"
+            pb="md"
+            style={{
+              borderBottom: "1px solid var(--mantine-color-default-border)",
+            }}
+          >
+            <Group
+              component={Link}
+              to="/"
+              onClick={close}
+              style={{ textDecoration: "none", color: "inherit" }}
+              gap="xs"
+            >
               <Avatar variant="filled" color="blue" radius="sm" size="sm">
                 <IconTerminal2 size={18} />
               </Avatar>
@@ -72,8 +124,13 @@ const Layout = ({ children }) => {
                 GreenCode
               </Text>
             </Group>
-            
-            <ActionIcon variant="default" onClick={() => toggleColorScheme()} size="lg" aria-label="Toggle color scheme">
+
+            <ActionIcon
+              variant="default"
+              onClick={() => toggleColorScheme()}
+              size="lg"
+              aria-label="Toggle color scheme"
+            >
               {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
             </ActionIcon>
           </Group>
@@ -81,7 +138,13 @@ const Layout = ({ children }) => {
           {/* Navigation Links */}
           <Stack gap="xs" mt="md">
             <Button
-              variant={location.pathname.startsWith("/problems") && !location.pathname.includes("create") && !location.pathname.includes("edit") ? "light" : "subtle"}
+              variant={
+                location.pathname.startsWith("/problems") &&
+                !location.pathname.includes("create") &&
+                !location.pathname.includes("edit")
+                  ? "light"
+                  : "subtle"
+              }
               color="blue"
               component={Link}
               to="/problems"
@@ -96,7 +159,9 @@ const Layout = ({ children }) => {
 
             {user && user?.role === "admin" && (
               <Button
-                variant={location.pathname === "/problems/create" ? "filled" : "light"}
+                variant={
+                  location.pathname === "/problems/create" ? "filled" : "light"
+                }
                 color="blue"
                 component={Link}
                 to="/problems/create"
@@ -113,12 +178,24 @@ const Layout = ({ children }) => {
         </Stack>
 
         {/* Profile / User section anchored to bottom of navbar */}
-        <Box pt="md" style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
+        <Box
+          pt="md"
+          style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}
+        >
           {user ? (
             <Menu shadow="md" width={220} position="top-start" offset={8}>
               <Menu.Target>
                 <UnstyledButton style={{ width: "100%" }}>
-                  <Group justify="between" gap="xs" p="xs" style={{ borderRadius: "var(--mantine-radius-md)", transition: "background-color 0.2s" }} className="profile-button">
+                  <Group
+                    justify="between"
+                    gap="xs"
+                    p="xs"
+                    style={{
+                      borderRadius: "var(--mantine-radius-md)",
+                      transition: "background-color 0.2s",
+                    }}
+                    className="profile-button"
+                  >
                     <Group gap="xs" style={{ minWidth: 0, flexGrow: 1 }}>
                       <Avatar color="blue" radius="xl" size="md">
                         {initial}
@@ -132,7 +209,13 @@ const Layout = ({ children }) => {
                         </Text>
                       </Box>
                     </Group>
-                    <IconChevronDown size={14} style={{ color: "var(--mantine-color-dimmed)", flexShrink: 0 }} />
+                    <IconChevronDown
+                      size={14}
+                      style={{
+                        color: "var(--mantine-color-dimmed)",
+                        flexShrink: 0,
+                      }}
+                    />
                   </Group>
                 </UnstyledButton>
               </Menu.Target>
@@ -140,7 +223,12 @@ const Layout = ({ children }) => {
               <Menu.Dropdown>
                 <Menu.Label>Logged in as</Menu.Label>
                 <Menu.Item disabled>
-                  <Text size="xs" fw={600} truncate style={{ color: "var(--mantine-color-text)" }}>
+                  <Text
+                    size="xs"
+                    fw={600}
+                    truncate
+                    style={{ color: "var(--mantine-color-text)" }}
+                  >
                     {displayEmail}
                   </Text>
                   {user?.role === "admin" && (
@@ -163,10 +251,23 @@ const Layout = ({ children }) => {
             </Menu>
           ) : (
             <Stack gap="xs">
-              <Button variant="subtle" color="gray" component={Link} to="/login" onClick={close} fullWidth>
+              <Button
+                variant="subtle"
+                color="gray"
+                component={Link}
+                to="/login"
+                onClick={close}
+                fullWidth
+              >
                 Sign In
               </Button>
-              <Button color="blue" component={Link} to="/register" onClick={close} fullWidth>
+              <Button
+                color="blue"
+                component={Link}
+                to="/register"
+                onClick={close}
+                fullWidth
+              >
                 Sign Up
               </Button>
             </Stack>
