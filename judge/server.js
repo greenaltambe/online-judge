@@ -7,7 +7,17 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/run", async (req, res) => {
+const authenticateRequest = (req, res, next) => {
+	const secret = req.headers["x-judge-service-secret"];
+	if (!secret || secret !== process.env.JUDGE_SERVICE_SECRET) {
+		return res.status(401).json({
+			error: "Unauthorized: Invalid or missing Judge Service Secret",
+		});
+	}
+	next();
+};
+
+app.post("/run", authenticateRequest, async (req, res) => {
 	const { code, language, input } = req.body;
 	let output = null;
 	let errorMsg = null;

@@ -13,7 +13,7 @@ services:
     networks:
       - oj-network
 
-  # Redis 
+  # Redis
   redis:
     image: redis:7-alpine
     container_name: oj-redis
@@ -25,7 +25,7 @@ services:
     networks:
       - oj-network
 
-  # MinIO 
+  # MinIO
   minio:
     image: minio/minio:latest
     container_name: oj-minio
@@ -54,34 +54,35 @@ services:
       dockerfile: Dockerfile
     container_name: oj-backend
     restart: unless-stopped
+
+    env_file:
+      - .env
+
     ports:
       - "5000:5000"
+
     volumes:
       - ./backend:/app
       - /app/node_modules
       - backend_problems:/app/problems
+
     environment:
-      NODE_ENV: development
       PORT: 5000
       MONGODB_URI: mongodb://mongodb:27017/online-judge
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRE: 30d
-      STORAGE_TYPE: ${STORAGE_TYPE:-local}
+      REDIS_URL: redis://redis:6379
       STORAGE_BASE_PATH: /app/problems
       MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-      MINIO_BUCKET: problems
-      REDIS_URL: redis://redis:6379
       JUDGE_SERVICE_URL: http://judge:5010
-      JUDGE_SERVICE_SECRET: ${JUDGE_SERVICE_SECRET}
       CORS_ORIGIN: http://localhost:5173
+
     depends_on:
       - mongodb
       - redis
       - minio
+
     networks:
       - oj-network
+
     command: npm run dev
 
   # Judge Service
@@ -91,23 +92,31 @@ services:
       dockerfile: Dockerfile
     container_name: oj-judge
     restart: unless-stopped
+
+    env_file:
+      - .env
+
     ports:
       - "5010:5010"
+
     volumes:
       - ./judge:/app
       - ./judge/temp:/app/temp
       - /app/node_modules
       - /var/run/docker.sock:/var/run/docker.sock
+
     environment:
-      NODE_ENV: development
       PORT: 5010
-      JUDGE_SERVICE_SECRET: ${JUDGE_SERVICE_SECRET}
+
       MAX_MEMORY: 256m
       MAX_CPU: 0.5
       EXECUTION_TIMEOUT: 5
+
+    privileged: true
+
     networks:
       - oj-network
-    privileged: true
+
     command: npm run dev
 
   # Frontend
@@ -116,19 +125,26 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
+
     container_name: oj-frontend
     restart: unless-stopped
+
+    env_file:
+      - .env
+
     ports:
       - "5173:5173"
+
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      VITE_API_URL: http://localhost:5000/api
+
     depends_on:
       - backend
+
     networks:
       - oj-network
+
     command: npm run dev -- --host
 
 networks:

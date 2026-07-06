@@ -34,6 +34,11 @@ export const runSolution = async ({ problemId, code, language }) => {
         language,
         input,
       },
+      {
+        headers: {
+          "x-judge-service-secret": process.env.JUDGE_SERVICE_SECRET,
+        },
+      }
     );
 
     const output = response_data.data;
@@ -100,6 +105,11 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
           language,
           input: inputContent,
         },
+        {
+          headers: {
+            "x-judge-service-secret": process.env.JUDGE_SERVICE_SECRET,
+          },
+        }
       );
 
       const actualOutput = response_data.data?.output;
