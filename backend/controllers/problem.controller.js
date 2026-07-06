@@ -28,6 +28,7 @@ export const setProblem = asyncHandler(async (req, res) => {
     difficulty: req.body.difficulty,
     testCases: req.body.testCases,
     files: req.files,
+    tags: req.body.tags,
   });
   res.status(201).json(result);
 });

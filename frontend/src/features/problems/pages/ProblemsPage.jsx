@@ -51,7 +51,7 @@ const ProblemsPage = () => {
     if (!isError) return;
 
     notifications.show({
-      title: "Error fetching problems",
+      title: "Operation Failed",
       message: message || "Please check backend connection.",
       color: "red",
     });
@@ -80,13 +80,15 @@ const ProblemsPage = () => {
   const confirmDelete = async () => {
     if (!problemToDelete) return;
 
-    await deleteProblem(problemToDelete._id);
+    const success = await deleteProblem(problemToDelete._id);
 
-    notifications.show({
-      title: "Problem Removed",
-      message: `"${problemToDelete.title}" has been deleted successfully.`,
-      color: "blue",
-    });
+    if (success) {
+      notifications.show({
+        title: "Problem Removed",
+        message: `"${problemToDelete.title}" has been deleted successfully.`,
+        color: "blue",
+      });
+    }
 
     setDeleteModalOpen(false);
     setProblemToDelete(null);

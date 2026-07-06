@@ -2,6 +2,7 @@ import Problem from "../models/problem.model.js";
 import Submission from "../models/submission.model.js";
 import storage from "../config/storage.js";
 import { AppError } from "../utils/errors.js";
+import { PROBLEM_TAG_IDS } from "../constants/problemTags.js";
 
 function getTestPairs(inputs, outputs) {
   const pairs = [];
@@ -41,7 +42,7 @@ export const getProblemById = async (id, userId) => {
   return { problem, lastSubmission };
 };
 
-export const createProblem = async ({ title, description, difficulty, testCases, files }) => {
+export const createProblem = async ({ title, description, difficulty, testCases, files, tags }) => {
   if (!title) {
     throw new AppError("Please add a title field", 400);
   }
@@ -60,6 +61,29 @@ export const createProblem = async ({ title, description, difficulty, testCases,
     parsedTestCases = typeof testCases === "string" ? JSON.parse(testCases) : testCases;
   } catch (error) {
     throw new AppError("Invalid test cases format", 400);
+  }
+
+  let parsedTags = [];
+  if (tags) {
+    try {
+      parsedTags = typeof tags === "string" ? JSON.parse(tags) : tags;
+    } catch (e) {
+      if (Array.isArray(tags)) {
+        parsedTags = tags;
+      } else {
+        parsedTags = [tags];
+      }
+    }
+
+    if (!Array.isArray(parsedTags)) {
+      throw new AppError("Tags must be an array of strings", 400);
+    }
+
+    for (const tag of parsedTags) {
+      if (!PROBLEM_TAG_IDS.includes(tag)) {
+        throw new AppError(`Invalid tag: ${tag}`, 400);
+      }
+    }
   }
 
   const inputs = files?.inputs || [];
@@ -87,6 +111,7 @@ export const createProblem = async ({ title, description, difficulty, testCases,
     description,
     difficulty,
     testCases: parsedTestCases,
+    tags: parsedTags,
   });
 
   for (const pair of testPairs) {
@@ -106,11 +131,38 @@ export const updateProblem = async (id, updateData) => {
     throw new AppError("Problem not found", 400);
   }
 
+  // Parse and validate tags if provided
+  let parsedTags = updateData.tags;
+  if (parsedTags) {
+    try {
+      parsedTags = typeof parsedTags === "string" ? JSON.parse(parsedTags) : parsedTags;
+    } catch (e) {
+      if (Array.isArray(parsedTags)) {
+        // already array
+      } else {
+        parsedTags = [parsedTags];
+      }
+    }
+
+    if (!Array.isArray(parsedTags)) {
+      throw new AppError("Tags must be an array of strings", 400);
+    }
+
+    for (const tag of parsedTags) {
+      if (!PROBLEM_TAG_IDS.includes(tag)) {
+        throw new AppError(`Invalid tag: ${tag}`, 400);
+      }
+    }
+
+    updateData.tags = parsedTags;
+  }
+
   const updatedProblem = await Problem.findByIdAndUpdate(
     id,
     updateData,
     {
       new: true,
+      runValidators: true,
     },
   );
 
@@ -126,7 +178,12 @@ export const deleteProblem = async (id) => {
 
   await problem.deleteOne(); // This deletes the problem from the database
 
-  // Delete the test cases from storage
-  await storage.deleteTestCases(problem._id); // This deletes the test cases from the storage
+  try {
+    // Delete the test cases from storage
+    await storage.deleteTestCases(problem._id); // This deletes the test cases from the storage
+  } catch (storageError) {
+    console.error(`Failed to delete test cases for problem ${id} from storage:`, storageError);
+  }
+
   return { message: "Problem removed" };
 };

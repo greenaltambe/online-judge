@@ -1,8 +1,9 @@
-import { ActionIcon, Group, Table, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Table, Text, Tooltip, Badge } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { IconChevronRight, IconEdit, IconTrash } from "@tabler/icons-react";
 
 import { getDifficultyBadge } from "../../utils/difficulty";
+import { PROBLEM_TAG_MAP } from "../../data/problemTags";
 
 const ProblemRow = ({ problem, isAdmin, navigate, onDelete }) => {
   return (
@@ -16,6 +17,18 @@ const ProblemRow = ({ problem, isAdmin, navigate, onDelete }) => {
         <Text fw={600} size="md">
           {problem.title}
         </Text>
+        {problem.tags && problem.tags.length > 0 && (
+          <Group gap={6} mt={6}>
+            {problem.tags.map((tagId) => {
+              const tag = PROBLEM_TAG_MAP[tagId];
+              return tag ? (
+                <Badge key={tagId} variant="light" size="xs" color="gray" radius="sm">
+                  {tag.label}
+                </Badge>
+              ) : null;
+            })}
+          </Group>
+        )}
       </Table.Td>
 
       <Table.Td>{getDifficultyBadge(problem.difficulty)}</Table.Td>

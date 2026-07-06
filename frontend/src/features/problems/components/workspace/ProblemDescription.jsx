@@ -1,7 +1,8 @@
-import { ScrollArea, Stack, Divider, Text, Card, Group, Box } from "@mantine/core";
+import { ScrollArea, Stack, Divider, Text, Card, Group, Box, Badge } from "@mantine/core";
 import { marked } from "marked";
+import { PROBLEM_TAG_MAP } from "../../data/problemTags";
 
-const ProblemDescription = ({ description, testCases }) => {
+const ProblemDescription = ({ description, testCases, tags }) => {
   const renderDescription = (desc) => {
     try {
       return { __html: marked.parse(desc || "") };
@@ -22,6 +23,19 @@ const ProblemDescription = ({ description, testCases }) => {
           }}
           dangerouslySetInnerHTML={renderDescription(description)}
         />
+
+        {tags && tags.length > 0 && (
+          <Group gap="xs">
+            {tags.map((tagId) => {
+              const tag = PROBLEM_TAG_MAP[tagId];
+              return tag ? (
+                <Badge key={tagId} variant="outline" color="blue">
+                  {tag.label}
+                </Badge>
+              ) : null;
+            })}
+          </Group>
+        )}
 
         <Divider />
 

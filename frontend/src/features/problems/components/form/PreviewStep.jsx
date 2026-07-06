@@ -1,4 +1,5 @@
-import { Badge, Card, Divider, Stack, Text, Title } from "@mantine/core";
+import { Badge, Card, Divider, Stack, Text, Title, Group } from "@mantine/core";
+import { PROBLEM_TAG_MAP } from "../../data/problemTags";
 
 const PreviewStep = ({
   title,
@@ -6,6 +7,7 @@ const PreviewStep = ({
   difficultyColor,
   parsedDescription,
   testCases,
+  tags,
 }) => {
   return (
     <Card mt="xl" p="lg" withBorder radius="md">
@@ -19,9 +21,21 @@ const PreviewStep = ({
             {title || "Untitled Problem"}
           </Title>
 
-          <Badge mt="xs" color={difficultyColor}>
-            {difficulty}
-          </Badge>
+          <Group gap="xs" mt="xs">
+            <Badge color={difficultyColor}>
+              {difficulty}
+            </Badge>
+
+            {tags &&
+              tags.map((tagId) => {
+                const tag = PROBLEM_TAG_MAP[tagId];
+                return tag ? (
+                  <Badge key={tagId} variant="outline" color="blue">
+                    {tag.label}
+                  </Badge>
+                ) : null;
+              })}
+          </Group>
         </div>
 
         <Divider />

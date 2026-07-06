@@ -222,6 +222,7 @@ const ProblemWorkspace = () => {
                       <ProblemDescription
                         description={currentProblem.problem.description}
                         testCases={currentProblem.problem.testCases}
+                        tags={currentProblem.problem.tags}
                       />
                     </Tabs.Panel>
 

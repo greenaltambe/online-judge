@@ -1,6 +1,15 @@
-import { Card, Select, Stack, TextInput } from "@mantine/core";
+import { Card, Select, Stack, TextInput, MultiSelect } from "@mantine/core";
+import { PROBLEM_TAGS, TAG_CATEGORIES } from "../../data/problemTags";
 
-const BasicInfoStep = ({ title, setTitle, difficulty, setDifficulty }) => {
+const BasicInfoStep = ({ title, setTitle, difficulty, setDifficulty, tags, setTags }) => {
+  const selectData = TAG_CATEGORIES.map((category) => ({
+    group: category,
+    items: PROBLEM_TAGS.filter((tag) => tag.category === category).map((tag) => ({
+      value: tag.id,
+      label: tag.label,
+    })),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <Card mt="xl" p="lg" withBorder radius="md">
       <Stack gap="md">
@@ -30,6 +39,17 @@ const BasicInfoStep = ({ title, setTitle, difficulty, setDifficulty }) => {
               value: "hard",
             },
           ]}
+        />
+
+        <MultiSelect
+          label="Problem Tags"
+          placeholder="Select one or more tags (e.g. Array, DFS)"
+          data={selectData}
+          value={tags}
+          onChange={setTags}
+          searchable
+          clearable
+          nothingFoundMessage="No tags found"
         />
       </Stack>
     </Card>

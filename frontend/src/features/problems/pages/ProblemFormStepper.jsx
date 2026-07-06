@@ -41,6 +41,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
   const [testCases, setTestCases] = useState([{ input: "", expectedOutput: "" }]);
   const [inputsFiles, setInputsFiles] = useState([]);
   const [outputsFiles, setOutputsFiles] = useState([]);
+  const [tags, setTags] = useState([]);
 
   // Fetch problem details if editing
   useEffect(() => {
@@ -62,6 +63,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
       if (prob.testCases && prob.testCases.length > 0) {
         setTestCases(prob.testCases);
       }
+      setTags(prob.tags || []);
     }
   }, [mode, currentProblem]);
 
@@ -175,6 +177,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
       formData.append("description", description);
       formData.append("difficulty", difficulty);
       formData.append("testCases", JSON.stringify(testCases));
+      formData.append("tags", JSON.stringify(tags));
       inputsFiles.forEach((f) => formData.append("inputs", f));
       outputsFiles.forEach((f) => formData.append("outputs", f));
 
@@ -185,6 +188,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
         description,
         difficulty,
         testCases,
+        tags,
       };
       updateProblem(id, payload);
     }
@@ -240,6 +244,8 @@ const ProblemFormStepper = ({ mode = "create" }) => {
               setTitle={setTitle}
               difficulty={difficulty}
               setDifficulty={setDifficulty}
+              tags={tags}
+              setTags={setTags}
             />
           </Stepper.Step>
 
@@ -284,6 +290,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
               difficultyColor={getDifficultyColor(difficulty)}
               parsedDescription={getParsedDescription()}
               testCases={testCases}
+              tags={tags}
             />
           </Stepper.Step>
 

@@ -99,6 +99,7 @@ export const useProblemStore = create((set) => ({
         isLoading: false,
         isSuccess: true,
       }));
+      return true;
     } catch (error) {
       const message =
         (error.response &&
@@ -107,6 +108,7 @@ export const useProblemStore = create((set) => ({
         error.message ||
         error.toString();
       set({ isLoading: false, isError: true, message });
+      return false;
     }
   },
 

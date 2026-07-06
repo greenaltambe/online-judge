@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { PROBLEM_TAG_IDS } from "../constants/problemTags.js";
 
 const problemSchema = mongoose.Schema(
   {
@@ -15,10 +16,6 @@ const problemSchema = mongoose.Schema(
       required: true,
       enum: ["easy", "medium", "hard"],
     },
-    topics: {
-      type: [String],
-      required: true,
-    },
     testCases: [
       {
         input: {
@@ -31,6 +28,11 @@ const problemSchema = mongoose.Schema(
         },
       },
     ],
+    tags: {
+      type: [String],
+      enum: PROBLEM_TAG_IDS,
+      default: [],
+    },
   },
   {
     timestamps: true,
