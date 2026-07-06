@@ -4,9 +4,9 @@ import Layout from "./components/layout/Layout";
 import LandingPage from "./features/landing/LandingPage";
 import LoginPage from "./features/auth/LoginPage";
 import RegisterPage from "./features/auth/RegisterPage";
-import ProblemsPage from "./features/problems/ProblemsPage";
-import ProblemWorkspace from "./features/problems/ProblemWorkspace";
-import ProblemFormStepper from "./features/problems/ProblemFormStepper";
+import ProblemsPage from "./features/problems/pages/ProblemsPage";
+import ProblemWorkspace from "./features/problems/pages/ProblemWorkspace";
+import ProblemFormStepper from "./features/problems/pages/ProblemFormStepper";
 
 // Guard for authenticated users
 const ProtectedRoute = ({ children }) => {
