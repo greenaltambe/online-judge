@@ -8,6 +8,7 @@ const ProblemsTable = ({
   isAdmin,
   navigate,
   onDelete,
+  onAddToList,
 }) => {
   return (
     <Card
@@ -38,17 +39,15 @@ const ProblemsTable = ({
               Difficulty
             </Table.Th>
 
-            {isAdmin && (
-              <Table.Th
-                style={{
-                  width: 120,
-                  textAlign: "right",
-                  fontWeight: 600,
-                }}
-              >
-                Actions
-              </Table.Th>
-            )}
+            <Table.Th
+              style={{
+                width: isAdmin ? 150 : 80,
+                textAlign: "right",
+                fontWeight: 600,
+              }}
+            >
+              Actions
+            </Table.Th>
 
             <Table.Th width={60} />
           </Table.Tr>
@@ -66,21 +65,19 @@ const ProblemsTable = ({
                   <Skeleton height={24} width={80} radius="xl" />
                 </Table.Td>
 
-                {isAdmin && (
-                  <Table.Td
+                <Table.Td
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  <Skeleton
+                    circle
+                    height={28}
                     style={{
-                      textAlign: "right",
+                      display: "inline-block",
                     }}
-                  >
-                    <Skeleton
-                      circle
-                      height={28}
-                      style={{
-                        display: "inline-block",
-                      }}
-                    />
-                  </Table.Td>
-                )}
+                  />
+                </Table.Td>
 
                 <Table.Td>
                   <Skeleton circle height={20} />
@@ -95,12 +92,13 @@ const ProblemsTable = ({
                 isAdmin={isAdmin}
                 navigate={navigate}
                 onDelete={onDelete}
+                onAddToList={onAddToList}
               />
             ))
           ) : (
             <Table.Tr>
               <Table.Td
-                colSpan={isAdmin ? 4 : 3}
+                colSpan={4}
                 style={{
                   textAlign: "center",
                   padding: "40px",

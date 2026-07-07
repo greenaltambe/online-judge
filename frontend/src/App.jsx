@@ -7,6 +7,8 @@ import RegisterPage from "./features/auth/RegisterPage";
 import ProblemsPage from "./features/problems/pages/ProblemsPage";
 import ProblemWorkspace from "./features/problems/pages/ProblemWorkspace";
 import ProblemFormStepper from "./features/problems/pages/ProblemFormStepper";
+import UserListsPage from "./features/userlist/pages/UserListsPage";
+import UserListDetailsPage from "./features/userlist/pages/UserListDetailsPage";
 
 // Guard for authenticated users
 const ProtectedRoute = ({ children }) => {
@@ -77,6 +79,28 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <ProblemWorkspace />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/userlists"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UserListsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/userlists/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <UserListDetailsPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -10,6 +10,7 @@ import { useSubmissionStore } from "../../../stores/submissionStore";
 // Subcomponents
 import WorkspaceHeader from "../components/workspace/WorkspaceHeader";
 import ProblemDescription from "../components/workspace/ProblemDescription";
+import AddProblemToListModal from "../../userlist/components/AddProblemToListModal";
 import SubmissionHistory from "../components/workspace/SubmissionHistory";
 import CodeEditor from "../components/workspace/CodeEditor";
 import WorkspaceConsole from "../components/workspace/WorkspaceConsole";
@@ -80,6 +81,7 @@ const ProblemWorkspace = () => {
   // UI state variables
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [consoleTab, setConsoleTab] = useState("run");
+  const [addToListModalOpen, setAddToListModalOpen] = useState(false);
   const [activeTestCaseIndex, setActiveTestCaseIndex] = useState(0);
   const [activeSubmissionCaseIndex, setActiveSubmissionCaseIndex] = useState(0);
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
@@ -179,6 +181,7 @@ const ProblemWorkspace = () => {
         onLanguageChange={(val) => setLanguage(val || "cpp")}
         onOpenSettings={() => setSettingsOpen(true)}
         onBack={() => navigate("/problems")}
+        onAddToList={() => setAddToListModalOpen(true)}
       />
 
       {/* Main Workspace Splitter */}
@@ -321,6 +324,12 @@ const ProblemWorkspace = () => {
         language={viewingLanguage}
         theme={theme}
         fontSize={fontSize}
+      />
+
+      <AddProblemToListModal
+        opened={addToListModalOpen}
+        onClose={() => setAddToListModalOpen(false)}
+        problem={currentProblem?.problem}
       />
     </Box>
   );

@@ -1,5 +1,6 @@
-import UserList from "../models/userlist.model";
-import { AppError } from "../utils/errors";
+import UserList from "../models/userlist.model.js";
+import Problem from "../models/problem.model.js";
+import { AppError } from "../utils/errors.js";
 
 export const createUserList = async ({
   owner,
@@ -12,25 +13,28 @@ export const createUserList = async ({
     throw new AppError("Please add an owner field", 400);
   }
 
-  if (!name) {
+  const trimmedName = name ? name.trim() : "";
+  const trimmedDescription = description ? description.trim() : "";
+
+  if (!trimmedName) {
     throw new AppError("Please add a name field", 400);
   }
 
-  if (!description) {
+  if (!trimmedDescription) {
     throw new AppError("Please add a description field", 400);
   }
 
-  const existingUserList = await UserList.findOne({ owner, name });
+  const existingUserList = await UserList.findOne({ owner, name: trimmedName });
   if (existingUserList) {
     throw new AppError("A user list with this name already exists", 400);
   }
 
   const newUserList = new UserList({
     owner,
-    name,
-    description,
-    isPublic,
-    problems,
+    name: trimmedName,
+    description: trimmedDescription,
+    isPublic: isPublic !== undefined ? isPublic : false,
+    problems: problems || [],
   });
   await newUserList.save();
   return newUserList;
@@ -43,6 +47,11 @@ export const addProblemToUserList = async (userListId, problemId, owner) => {
   });
   if (!userList) {
     throw new AppError("User list not found", 404);
+  }
+
+  const problemExists = await Problem.findById(problemId);
+  if (!problemExists) {
+    throw new AppError("Problem not found", 404);
   }
 
   const exists = userList.problems.findIndex(
@@ -86,7 +95,7 @@ export const removeProblemFromUserList = async (
 export const getUserListById = async (userListId, owner) => {
   const userList = await UserList.findOne({
     _id: userListId,
-    owner: owner,
+    $or: [{ owner: owner }, { isPublic: true }],
   }).populate("problems", "title difficulty tags");
   if (!userList) {
     throw new AppError("User list not found", 404);
@@ -95,7 +104,7 @@ export const getUserListById = async (userListId, owner) => {
 };
 
 export const getAllUserLists = async (owner) => {
-  const userLists = await UserList.find({ owner }).populate("problems");
+  const userLists = await UserList.find({ owner }).populate("problems", "title difficulty tags");
   return userLists;
 };
 
@@ -108,21 +117,28 @@ export const updateUserList = async (userListId, updateData, owner) => {
     throw new AppError("User list not found", 404);
   }
 
-  const existingUserList = await UserList.findOne({
-    _id: { $ne: userListId },
-    owner: owner,
-    name: updateData.name,
-  });
-  if (existingUserList) {
-    throw new AppError("A user list with this name already exists", 400);
+  if (updateData.name !== undefined) {
+    const trimmedName = updateData.name.trim();
+    if (!trimmedName) {
+      throw new AppError("Please add a name field", 400);
+    }
+    const existingUserList = await UserList.findOne({
+      _id: { $ne: userListId },
+      owner: owner,
+      name: trimmedName,
+    });
+    if (existingUserList) {
+      throw new AppError("A user list with this name already exists", 400);
+    }
+    userList.name = trimmedName;
   }
 
-  if (updateData.name) {
-    userList.name = updateData.name;
-  }
-
-  if (updateData.description) {
-    userList.description = updateData.description;
+  if (updateData.description !== undefined) {
+    const trimmedDescription = updateData.description.trim();
+    if (!trimmedDescription) {
+      throw new AppError("Please add a description field", 400);
+    }
+    userList.description = trimmedDescription;
   }
 
   if (updateData.isPublic !== undefined) {
@@ -145,3 +161,4 @@ export const deleteUserList = async (userListId, owner) => {
   await userList.deleteOne();
   return { message: "User list deleted successfully" };
 };
+

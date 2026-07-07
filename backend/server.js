@@ -3,6 +3,7 @@ import colors from "colors";
 import errorHandler from "./middleware/error.middleware.js";
 import authRouter from "./routes/auth.routes.js";
 import problemsRouter from "./routes/problem.route.js";
+import userListsRouter from "./routes/userList.routes.js";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import { validateEnv } from "./config/validateEnv.js";
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: false })); // Middleware to parse URL-enc
 
 app.use("/api/auth", authRouter); // for login, register, logout
 app.use("/api/problems", problemsRouter); // for all problems related routes
+app.use("/api/userlists", userListsRouter); // for user lists related routes
 
 app.use(errorHandler); // Custom error handling middleware
 

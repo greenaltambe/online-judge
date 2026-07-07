@@ -1,5 +1,5 @@
 import { Group, Button, Divider, Text, Badge, Select, Tooltip, ActionIcon } from "@mantine/core";
-import { IconArrowLeft, IconSettings } from "@tabler/icons-react";
+import { IconArrowLeft, IconSettings, IconBookmark } from "@tabler/icons-react";
 import { getDifficultyColor } from "../../utils/difficulty";
 
 const WorkspaceHeader = ({
@@ -8,6 +8,7 @@ const WorkspaceHeader = ({
   onLanguageChange,
   onOpenSettings,
   onBack,
+  onAddToList,
 }) => {
   return (
     <Group
@@ -54,6 +55,18 @@ const WorkspaceHeader = ({
           ]}
           style={{ width: 120 }}
         />
+
+        {/* Add to list button */}
+        <Tooltip label="Add to List">
+          <ActionIcon
+            variant="default"
+            size="lg"
+            onClick={onAddToList}
+            aria-label="Add to list"
+          >
+            <IconBookmark size={18} />
+          </ActionIcon>
+        </Tooltip>
 
         {/* Settings button */}
         <Tooltip label="Editor Settings">

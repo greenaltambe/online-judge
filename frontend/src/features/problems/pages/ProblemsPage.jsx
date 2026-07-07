@@ -12,6 +12,7 @@ import ProblemsHeader from "../components/problem-list/ProblemsHeader";
 import ProblemFilters from "../components/problem-list/ProblemFilters";
 import ProblemsTable from "../components/problem-list/ProblemsTable";
 import DeleteProblemModal from "../components/problem-list/DeleteProblemModal";
+import AddProblemToListModal from "../../userlist/components/AddProblemToListModal";
 
 const ProblemsPage = () => {
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ const ProblemsPage = () => {
   // Delete modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [problemToDelete, setProblemToDelete] = useState(null);
+
+  // Add to list modal
+  const [addToListModalOpen, setAddToListModalOpen] = useState(false);
+  const [problemForList, setProblemForList] = useState(null);
 
   // Fetch problems
   useEffect(() => {
@@ -76,6 +81,14 @@ const ProblemsPage = () => {
     setDeleteModalOpen(true);
   };
 
+  // Add to list button clicked
+  const handleAddToListClick = (event, problem) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setProblemForList(problem);
+    setAddToListModalOpen(true);
+  };
+
   // Confirm delete
   const confirmDelete = async () => {
     if (!problemToDelete) return;
@@ -114,6 +127,7 @@ const ProblemsPage = () => {
           isAdmin={user?.role === "admin"}
           navigate={navigate}
           onDelete={handleDeleteClick}
+          onAddToList={handleAddToListClick}
         />
       </Stack>
 
@@ -122,6 +136,15 @@ const ProblemsPage = () => {
         onClose={() => setDeleteModalOpen(false)}
         problem={problemToDelete}
         onConfirm={confirmDelete}
+      />
+
+      <AddProblemToListModal
+        opened={addToListModalOpen}
+        onClose={() => {
+          setAddToListModalOpen(false);
+          setProblemForList(null);
+        }}
+        problem={problemForList}
       />
     </Container>
   );

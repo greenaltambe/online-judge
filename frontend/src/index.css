@@ -55,3 +55,19 @@ body,
 .profile-button:hover {
   background-color: var(--mantine-color-default-hover);
 }
+
+/* User list card hover states */
+.user-list-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.user-list-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mantine-shadow-md);
+}
+
+/* Problem row hover pointer cursor */
+.clickable-row {
+  cursor: pointer;
+}
+

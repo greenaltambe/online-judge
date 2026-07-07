@@ -1,11 +1,11 @@
 import { ActionIcon, Group, Table, Text, Tooltip, Badge } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { IconChevronRight, IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconChevronRight, IconEdit, IconTrash, IconBookmark } from "@tabler/icons-react";
 
 import { getDifficultyBadge } from "../../utils/difficulty";
 import { PROBLEM_TAG_MAP } from "../../data/problemTags";
 
-const ProblemRow = ({ problem, isAdmin, navigate, onDelete }) => {
+const ProblemRow = ({ problem, isAdmin, navigate, onDelete, onAddToList }) => {
   return (
     <Table.Tr
       style={{
@@ -33,37 +33,49 @@ const ProblemRow = ({ problem, isAdmin, navigate, onDelete }) => {
 
       <Table.Td>{getDifficultyBadge(problem.difficulty)}</Table.Td>
 
-      {isAdmin && (
-        <Table.Td
-          style={{
-            textAlign: "right",
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Group justify="end" gap="xs">
-            <Tooltip label="Edit Problem">
-              <ActionIcon
-                component={Link}
-                to={`/problems/${problem._id}/edit`}
-                color="blue"
-                variant="light"
-              >
-                <IconEdit size={16} />
-              </ActionIcon>
-            </Tooltip>
+      <Table.Td
+        style={{
+          textAlign: "right",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Group justify="end" gap="xs">
+          <Tooltip label="Add to List">
+            <ActionIcon
+              color="blue"
+              variant="light"
+              onClick={(e) => onAddToList(e, problem)}
+            >
+              <IconBookmark size={16} />
+            </ActionIcon>
+          </Tooltip>
 
-            <Tooltip label="Delete Problem">
-              <ActionIcon
-                color="red"
-                variant="light"
-                onClick={(e) => onDelete(e, problem)}
-              >
-                <IconTrash size={16} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        </Table.Td>
-      )}
+          {isAdmin && (
+            <>
+              <Tooltip label="Edit Problem">
+                <ActionIcon
+                  component={Link}
+                  to={`/problems/${problem._id}/edit`}
+                  color="blue"
+                  variant="light"
+                >
+                  <IconEdit size={16} />
+                </ActionIcon>
+              </Tooltip>
+
+              <Tooltip label="Delete Problem">
+                <ActionIcon
+                  color="red"
+                  variant="light"
+                  onClick={(e) => onDelete(e, problem)}
+                >
+                  <IconTrash size={16} />
+                </ActionIcon>
+              </Tooltip>
+            </>
+          )}
+        </Group>
+      </Table.Td>
 
       <Table.Td
         style={{
@@ -82,3 +94,4 @@ const ProblemRow = ({ problem, isAdmin, navigate, onDelete }) => {
 };
 
 export default ProblemRow;
+

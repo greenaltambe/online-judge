@@ -25,6 +25,7 @@ import {
   IconList,
   IconSun,
   IconMoon,
+  IconBookmark,
 } from "@tabler/icons-react";
 
 const Layout = ({ children }) => {
@@ -155,6 +156,24 @@ const Layout = ({ children }) => {
               size="md"
             >
               Problems
+            </Button>
+
+            <Button
+              variant={
+                location.pathname.startsWith("/userlists")
+                  ? "light"
+                  : "subtle"
+              }
+              color="blue"
+              component={Link}
+              to="/userlists"
+              onClick={close}
+              leftSection={<IconBookmark size={16} />}
+              justify="start"
+              fullWidth
+              size="md"
+            >
+              My Lists
             </Button>
 
             {user && user?.role === "admin" && (
