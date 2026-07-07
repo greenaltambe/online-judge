@@ -17,7 +17,7 @@ if (!fs.existsSync(TEMP_DIR)) {
 
 /**
  * Runs code in a sandboxed Docker container using create, cp, start, and rm.
- * 
+ *
  * @param {Object} params
  * @param {string} params.code The source code to run
  * @param {string} params.input The input data for stdin
@@ -40,30 +40,43 @@ export async function runInDocker({ code, input, ext, command }) {
     const maxMemory = process.env.MAX_MEMORY || "256m";
     const maxCpu = process.env.MAX_CPU || "0.5";
 
-    // 1. Create the container
+    // Create the container
     const createCmd = `docker create --memory=${maxMemory} --cpus=${maxCpu} --network=none oj-executor ${command}`;
     const { stdout: createStdout } = await execPromise(createCmd);
     containerId = createStdout.trim();
 
     if (!containerId) {
-      throw new Error("Failed to create docker container: No container ID returned");
+      throw new Error(
+        "Failed to create docker container: No container ID returned",
+      );
     }
 
-    // 2. Copy the files into the container, renaming them to Main.<ext> and input.txt
-    await execPromise(`docker cp "${codeFile}" "${containerId}:/code/Main.${ext}"`);
-    await execPromise(`docker cp "${inputFile}" "${containerId}:/code/input.txt"`);
+    // Copy the files into the container, renaming them to Main.<ext> and input.txt
+    await execPromise(
+      `docker cp "${codeFile}" "${containerId}:/code/Main.${ext}"`,
+    );
+    await execPromise(
+      `docker cp "${inputFile}" "${containerId}:/code/input.txt"`,
+    );
 
-    // 3. Start the container and attach to it to capture output
-    const { stdout } = await execPromise(`docker start -a ${containerId}`, { timeout: 10000 });
+    // Start the container and attach to it to capture output
+    const { stdout } = await execPromise(`docker start -a ${containerId}`, {
+      timeout: 10000,
+    });
+
     return stdout;
   } catch (error) {
     // Extract container output or fallback
     const stderr = error.stderr || "";
     const stdout = error.stdout || "";
-    const errorMsg = stderr.trim() || stdout.trim() || error.message || "Unknown execution error";
+    const errorMsg =
+      stderr.trim() ||
+      stdout.trim() ||
+      error.message ||
+      "Unknown execution error";
     throw errorMsg;
   } finally {
-    // 4. Remove the container
+    // Remove the container
     if (containerId) {
       try {
         await execPromise(`docker rm -f ${containerId}`);
@@ -72,7 +85,7 @@ export async function runInDocker({ code, input, ext, command }) {
       }
     }
 
-    // 5. Clean up local files
+    // Clean up local files
     try {
       if (fs.existsSync(codeFile)) fs.unlinkSync(codeFile);
       if (fs.existsSync(inputFile)) fs.unlinkSync(inputFile);
