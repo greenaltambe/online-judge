@@ -9,6 +9,7 @@ import ProblemWorkspace from "./features/problems/pages/ProblemWorkspace";
 import ProblemFormStepper from "./features/problems/pages/ProblemFormStepper";
 import UserListsPage from "./features/userlist/pages/UserListsPage";
 import UserListDetailsPage from "./features/userlist/pages/UserListDetailsPage";
+import StatsPage from "./features/stats/pages/StatsPage";
 
 // Guard for authenticated users
 const ProtectedRoute = ({ children }) => {
@@ -90,6 +91,17 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <UserListsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/stats"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <StatsPage />
             </Layout>
           </ProtectedRoute>
         }

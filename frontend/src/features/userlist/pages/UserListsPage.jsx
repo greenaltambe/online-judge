@@ -169,7 +169,7 @@ const UserListsPage = () => {
               <Title order={3} fw={700}>
                 No Lists Yet
               </Title>
-              <Text size="sm" c="dimmed" maxW={400} mx="auto">
+              <Text size="sm" c="dimmed" style={{ maxWidth: 400 }} mx="auto">
                 Organize coding tasks by creating lists for review patterns, cheat sheets, or target companies.
               </Text>
               <Button onClick={handleCreateClick} mt="md" radius="md">

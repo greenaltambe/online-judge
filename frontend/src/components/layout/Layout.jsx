@@ -26,6 +26,7 @@ import {
   IconSun,
   IconMoon,
   IconBookmark,
+  IconChartBar,
 } from "@tabler/icons-react";
 
 const Layout = ({ children }) => {
@@ -159,10 +160,22 @@ const Layout = ({ children }) => {
             </Button>
 
             <Button
+              variant={location.pathname === "/stats" ? "light" : "subtle"}
+              color="blue"
+              component={Link}
+              to="/stats"
+              onClick={close}
+              leftSection={<IconChartBar size={16} />}
+              justify="start"
+              fullWidth
+              size="md"
+            >
+              Statistics
+            </Button>
+
+            <Button
               variant={
-                location.pathname.startsWith("/userlists")
-                  ? "light"
-                  : "subtle"
+                location.pathname.startsWith("/userlists") ? "light" : "subtle"
               }
               color="blue"
               component={Link}
@@ -179,7 +192,7 @@ const Layout = ({ children }) => {
             {user && user?.role === "admin" && (
               <Button
                 variant={
-                  location.pathname === "/problems/create" ? "filled" : "light"
+                  location.pathname === "/problems/create" ? "light" : "subtle"
                 }
                 color="blue"
                 component={Link}
