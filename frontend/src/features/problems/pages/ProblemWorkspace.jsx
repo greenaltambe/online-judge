@@ -13,6 +13,7 @@ import ProblemDescription from "../components/workspace/ProblemDescription";
 import AddProblemToListModal from "../../userlist/components/AddProblemToListModal";
 import SubmissionHistory from "../components/workspace/SubmissionHistory";
 import ProblemDiscussions from "../components/workspace/ProblemDiscussions";
+import ProblemNotes from "../components/workspace/ProblemNotes";
 import CodeEditor from "../components/workspace/CodeEditor";
 import WorkspaceConsole from "../components/workspace/WorkspaceConsole";
 import EditorSettingsDrawer from "../components/workspace/EditorSettingsDrawer";
@@ -220,6 +221,7 @@ const ProblemWorkspace = () => {
                       Submissions ({submissions ? submissions.length : 0})
                     </Tabs.Tab>
                     <Tabs.Tab value="discussions">Discussions</Tabs.Tab>
+                    <Tabs.Tab value="notes">My Notes</Tabs.Tab>
                   </Tabs.List>
 
                   <Box style={{ flexGrow: 1, overflow: "hidden", minHeight: 0 }}>
@@ -240,6 +242,10 @@ const ProblemWorkspace = () => {
 
                     <Tabs.Panel value="discussions" h="100%">
                       <ProblemDiscussions problemId={id} />
+                    </Tabs.Panel>
+
+                    <Tabs.Panel value="notes" h="100%">
+                      <ProblemNotes problemId={id} />
                     </Tabs.Panel>
                   </Box>
                 </Tabs>

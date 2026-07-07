@@ -6,6 +6,7 @@ import problemsRouter from "./routes/problem.route.js";
 import userListsRouter from "./routes/userList.routes.js";
 import statsRouter from "./routes/stats.routes.js";
 import discussionRouter from "./routes/discussion.routes.js";
+import userNoteRouter from "./routes/userNote.routes.js";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import { validateEnv } from "./config/validateEnv.js";
@@ -34,6 +35,7 @@ app.use("/api/problems", problemsRouter); // for all problems related routes
 app.use("/api/userlists", userListsRouter); // for user lists related routes
 app.use("/api/stats", statsRouter); // for user statistics routes
 app.use("/api/discussions", discussionRouter); // for problem discussions routes
+app.use("/api/notes", userNoteRouter); // for user private notes routes
 
 app.use(errorHandler); // Custom error handling middleware
 
