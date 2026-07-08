@@ -145,13 +145,3 @@ A bulk import ZIP archive must contain multiple problem directories at the root 
 ### Discussion Thread
 
 ### Admin Import Console
-
-## Roadmap
-
-* **Contest Support**: Create timed coding competitions with leaderboards.
-* **More Languages**: Support for Go, Rust, and JavaScript execution.
-* **Community Problem Sharing**: Allow users to share and rate custom problems.
-
-## License
-
-This project is licensed under the MIT License.
