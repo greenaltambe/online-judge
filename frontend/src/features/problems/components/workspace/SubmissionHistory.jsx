@@ -1,6 +1,16 @@
 import { ScrollArea, Stack, Card, Group, Badge, Text } from "@mantine/core";
 import { IconCheck, IconX, IconTerminal } from "@tabler/icons-react";
 
+const getVerdictLabel = (status) => {
+  if (status === "accepted") return "Accepted";
+  if (status === "wrong_answer") return "Wrong Answer";
+  if (status === "compile_error") return "Compile Error";
+  if (status === "runtime_error") return "Runtime Error";
+  if (status === "time_limit_exceeded") return "Time Limit Exceeded";
+  if (status === "memory_limit_exceeded") return "Memory Limit Exceeded";
+  return status ? status.charAt(0).toUpperCase() + status.slice(1) : "Rejected";
+};
+
 const SubmissionHistory = ({ submissions, onOpenSubmissionCode }) => {
   const formatTime = (dateStr) => {
     const d = new Date(dateStr);
@@ -33,7 +43,7 @@ const SubmissionHistory = ({ submissions, onOpenSubmissionCode }) => {
                     </Badge>
                   ) : (
                     <Badge color="red" leftSection={<IconX size={12} />}>
-                      Rejected
+                      {getVerdictLabel(sub.status)}
                     </Badge>
                   )}
                   <Text
@@ -43,6 +53,16 @@ const SubmissionHistory = ({ submissions, onOpenSubmissionCode }) => {
                   >
                     {sub.language}
                   </Text>
+                  {sub.executionTime !== undefined && sub.executionTime !== null && sub.executionTime > 0 && (
+                    <Text size="xs" c="dimmed">
+                      • {sub.executionTime} ms
+                    </Text>
+                  )}
+                  {sub.memoryUsage !== undefined && sub.memoryUsage !== null && sub.memoryUsage > 0 && (
+                    <Text size="xs" c="dimmed">
+                      • {(sub.memoryUsage / 1024 / 1024).toFixed(2)} MB
+                    </Text>
+                  )}
                 </Group>
                 <Text size="xs" c="dimmed">
                   {formatTime(sub.createdAt)}

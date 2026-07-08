@@ -12,6 +12,16 @@ import {
 } from "@mantine/core";
 import { IconTerminal, IconCheck, IconX } from "@tabler/icons-react";
 
+const getVerdictLabel = (status) => {
+  if (status === "accepted") return "Accepted";
+  if (status === "wrong_answer") return "Wrong Answer";
+  if (status === "compile_error") return "Compile Error";
+  if (status === "runtime_error") return "Runtime Error";
+  if (status === "time_limit_exceeded") return "Time Limit Exceeded";
+  if (status === "memory_limit_exceeded") return "Memory Limit Exceeded";
+  return status ? status.charAt(0).toUpperCase() + status.slice(1) : "Rejected";
+};
+
 const WorkspaceConsole = ({
   consoleTab,
   onTabChange,
@@ -276,10 +286,29 @@ const WorkspaceConsole = ({
                         size="md"
                         mt={5}
                       >
-                        {submissionResult.status === "accepted"
-                          ? "Accepted"
-                          : "Wrong Answer"}
+                        {getVerdictLabel(submissionResult.status)}
                       </Badge>
+                      {((submissionResult.executionTime && submissionResult.executionTime > 0) ||
+                        (submissionResult.memoryUsage && submissionResult.memoryUsage > 0)) && (
+                        <Box mt="md" style={{ borderTop: "1px dashed var(--mantine-color-default-border)", paddingTop: "8px" }}>
+                          <Group justify="space-between" mb={4}>
+                            <Text size="xs" c="dimmed" fw={500}>
+                              Time:
+                            </Text>
+                            <Text size="xs" fw={700}>
+                              {submissionResult.executionTime} ms
+                            </Text>
+                          </Group>
+                          <Group justify="space-between">
+                            <Text size="xs" c="dimmed" fw={500}>
+                              Memory:
+                            </Text>
+                            <Text size="xs" fw={700}>
+                              {(submissionResult.memoryUsage / 1024 / 1024).toFixed(2)} MB
+                            </Text>
+                          </Group>
+                        </Box>
+                      )}
                     </Box>
                     <Stack gap={0}>
                       {submissionResult.results &&

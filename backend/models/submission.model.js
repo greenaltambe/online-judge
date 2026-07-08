@@ -27,8 +27,42 @@ const submissionSchema = mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["pending", "accepted", "rejected"],
+      enum: [
+        "pending",
+        "accepted",
+        "rejected",
+        "wrong_answer",
+        "compile_error",
+        "runtime_error",
+        "time_limit_exceeded",
+        "memory_limit_exceeded",
+      ],
       default: "pending",
+    },
+
+    executionTime: {
+      type: Number,
+      default: 0,
+    },
+
+    memoryUsage: {
+      type: Number,
+      default: 0,
+    },
+
+    exitCode: {
+      type: Number,
+      default: 0,
+    },
+
+    compileOutput: {
+      type: String,
+      default: "",
+    },
+
+    stderr: {
+      type: String,
+      default: "",
     },
   },
   {

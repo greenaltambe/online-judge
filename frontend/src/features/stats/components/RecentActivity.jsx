@@ -37,6 +37,16 @@ const getLanguageColor = (lang) => {
   return "indigo";
 };
 
+const getVerdictLabel = (status) => {
+  if (status === "accepted") return "Accepted";
+  if (status === "wrong_answer") return "Wrong Answer";
+  if (status === "compile_error") return "Compile Error";
+  if (status === "runtime_error") return "Runtime Error";
+  if (status === "time_limit_exceeded") return "Time Limit Exceeded";
+  if (status === "memory_limit_exceeded") return "Memory Limit Exceeded";
+  return status ? status.charAt(0).toUpperCase() + status.slice(1) : "Rejected";
+};
+
 const RecentActivity = ({ activity }) => {
   const submissions = activity || [];
 
@@ -115,6 +125,8 @@ const RecentActivity = ({ activity }) => {
                       </Group>
                       <Text size="xs" c="dimmed" mt={2} fw={500}>
                         {formatRelativeTime(sub.createdAt)}
+                        {sub.executionTime !== undefined && sub.executionTime !== null && sub.executionTime > 0 && ` • ${sub.executionTime} ms`}
+                        {sub.memoryUsage !== undefined && sub.memoryUsage !== null && sub.memoryUsage > 0 && ` • ${(sub.memoryUsage / 1024 / 1024).toFixed(2)} MB`}
                       </Text>
                     </Box>
                   </Group>
@@ -129,7 +141,7 @@ const RecentActivity = ({ activity }) => {
                       </Badge>
                     ) : (
                       <Badge variant="filled" color="red" size="xs">
-                        Rejected
+                        {getVerdictLabel(sub.status)}
                       </Badge>
                     )}
                   </Group>

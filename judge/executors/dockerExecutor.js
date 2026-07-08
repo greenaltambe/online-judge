@@ -16,14 +16,14 @@ if (!fs.existsSync(TEMP_DIR)) {
 }
 
 /**
- * Runs code in a sandboxed Docker container using create, cp, start, and rm.
+ * Runs code in a sandboxed Docker container using create, cp, start, inspect, and rm.
  *
  * @param {Object} params
  * @param {string} params.code The source code to run
  * @param {string} params.input The input data for stdin
  * @param {string} params.ext The file extension (e.g. 'cpp', 'py', 'java')
  * @param {string} params.command The command to execute in the container
- * @returns {Promise<string>} The stdout of the execution
+ * @returns {Promise<Object>} Structured execution facts
  */
 export async function runInDocker({ code, input, ext, command }) {
   const jobId = uuidv4();
@@ -51,7 +51,7 @@ export async function runInDocker({ code, input, ext, command }) {
       );
     }
 
-    // Copy the files into the container, renaming them to Main.<ext> and input.txt
+    // Copy the files into the container
     await execPromise(
       `docker cp "${codeFile}" "${containerId}:/code/Main.${ext}"`,
     );
@@ -59,22 +59,78 @@ export async function runInDocker({ code, input, ext, command }) {
       `docker cp "${inputFile}" "${containerId}:/code/input.txt"`,
     );
 
-    // Start the container and attach to it to capture output
-    const { stdout } = await execPromise(`docker start -a ${containerId}`, {
-      timeout: 10000,
-    });
+    // Start the container
+    let stdout = "";
+    let stderr = "";
+    let timeout = false;
 
-    return stdout;
+    try {
+      const { stdout: execStdout, stderr: execStderr } = await execPromise(`docker start -a ${containerId}`, {
+        timeout: 10000,
+      });
+      stdout = execStdout;
+      stderr = execStderr;
+    } catch (error) {
+      stdout = error.stdout || "";
+      stderr = error.stderr || "";
+      if (error.signal === "SIGTERM" || error.code === "ETIMEDOUT") {
+        timeout = true;
+      }
+    }
+
+    // Inspect the container state
+    let exitCode = 0;
+    let oomKilled = false;
+
+    try {
+      const { stdout: inspectStdout } = await execPromise(`docker inspect --format='{{json .State}}' ${containerId}`);
+      const state = JSON.parse(inspectStdout.trim());
+      exitCode = state.ExitCode;
+      oomKilled = state.OOMKilled;
+    } catch (inspectError) {
+      console.error(`Failed to inspect container ${containerId}:`, inspectError);
+    }
+
+    const isTimeout = timeout || exitCode === 124;
+
+    // Try to retrieve /code/metrics.txt from the container
+    let executionTime = null;
+    let memoryUsage = null;
+    const metricsFile = path.join(TEMP_DIR, `metrics_${jobId}.txt`);
+    try {
+      await execPromise(`docker cp "${containerId}:/code/metrics.txt" "${metricsFile}"`);
+      if (fs.existsSync(metricsFile)) {
+        const content = fs.readFileSync(metricsFile, "utf8");
+        const timeMatch = content.match(/time:([0-9.]+)/);
+        const memoryMatch = content.match(/memory:([0-9]+)/);
+        if (timeMatch) {
+          executionTime = Math.round(parseFloat(timeMatch[1]) * 1000); // to ms
+        }
+        if (memoryMatch) {
+          memoryUsage = parseInt(memoryMatch[1], 10) * 1024; // to bytes
+        }
+      }
+    } catch (cpError) {
+      // Normal for compile/syntax errors where program execution is never reached
+    } finally {
+      if (fs.existsSync(metricsFile)) {
+        try { fs.unlinkSync(metricsFile); } catch (e) {}
+      }
+    }
+
+    return {
+      stdout: stdout.toString(),
+      stderr: stderr.toString(),
+      exitCode,
+      oomKilled,
+      timeout: isTimeout,
+      executionTime,
+      memoryUsage,
+    };
   } catch (error) {
-    // Extract container output or fallback
-    const stderr = error.stderr || "";
-    const stdout = error.stdout || "";
-    const errorMsg =
-      stderr.trim() ||
-      stdout.trim() ||
-      error.message ||
-      "Unknown execution error";
-    throw errorMsg;
+    // Unexpected infrastructure error during docker create/cp
+    console.error("Infrastructure error during runInDocker:", error);
+    throw error;
   } finally {
     // Remove the container
     if (containerId) {

@@ -1,16 +1,18 @@
 import { Card, Text, Group, Box, useMantineColorScheme } from "@mantine/core";
-import { IconTrophy, IconCloudUpload, IconAward, IconFlame } from "@tabler/icons-react";
+import { IconTrophy, IconCloudUpload, IconAward, IconFlame, IconClock, IconCpu } from "@tabler/icons-react";
 
 const StatsCard = ({ overview }) => {
   const { colorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";
 
-  const { solvedCount, totalSubmissions, acceptanceRate, currentStreak, longestStreak } = overview || {
+  const { solvedCount, totalSubmissions, acceptanceRate, currentStreak, longestStreak, averageRuntime, averageMemory } = overview || {
     solvedCount: 0,
     totalSubmissions: 0,
     acceptanceRate: 0,
     currentStreak: 0,
     longestStreak: 0,
+    averageRuntime: 0,
+    averageMemory: 0,
   };
 
   const cardData = [
@@ -45,6 +47,22 @@ const StatsCard = ({ overview }) => {
       icon: <IconFlame size={32} style={{ color: "var(--mantine-color-orange-filled)" }} />,
       gradient: "linear-gradient(135deg, rgba(253, 126, 20, 0.1) 0%, rgba(253, 126, 20, 0) 100%)",
       border: "1px solid var(--mantine-color-orange-light)",
+    },
+    {
+      title: "Average Runtime",
+      value: averageRuntime ? `${averageRuntime} ms` : "N/A",
+      desc: "Speed of accepted code",
+      icon: <IconClock size={32} style={{ color: "var(--mantine-color-green-filled)" }} />,
+      gradient: "linear-gradient(135deg, rgba(64, 192, 87, 0.1) 0%, rgba(64, 192, 87, 0) 100%)",
+      border: "1px solid var(--mantine-color-green-light)",
+    },
+    {
+      title: "Average Memory",
+      value: averageMemory ? `${(averageMemory / 1024 / 1024).toFixed(1)} MB` : "N/A",
+      desc: "Peak memory usage",
+      icon: <IconCpu size={32} style={{ color: "var(--mantine-color-cyan-filled)" }} />,
+      gradient: "linear-gradient(135deg, rgba(21, 170, 191, 0.1) 0%, rgba(21, 170, 191, 0) 100%)",
+      border: "1px solid var(--mantine-color-cyan-light)",
     },
   ];
 

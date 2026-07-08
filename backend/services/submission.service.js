@@ -41,35 +41,29 @@ export const runSolution = async ({ problemId, code, language }) => {
       }
     );
 
-    const output = response_data.data;
+    const result = response_data.data;
+    let actualOutput = "";
+    let passed = false;
 
-    // Check if there was an error in the output
-    if (output.error) {
-      response.push({
-        input,
-        output: output.error,
-        expectedOutput,
-        passed: false,
-      });
-      continue;
-    }
-
-    // Compare the output with the expected output
-    if (output.output.trim() === expectedOutput.trim()) {
-      response.push({
-        input,
-        output: output.output.trim(),
-        expectedOutput,
-        passed: true,
-      });
+    if (result.status === "compile_error") {
+      actualOutput = result.compileOutput || "Compile Error";
+    } else if (result.status === "time_limit_exceeded") {
+      actualOutput = "Time Limit Exceeded";
+    } else if (result.status === "memory_limit_exceeded") {
+      actualOutput = "Memory Limit Exceeded";
+    } else if (result.status === "runtime_error") {
+      actualOutput = result.stderr || "Runtime Error";
     } else {
-      response.push({
-        input,
-        output: output.output.trim(),
-        expectedOutput,
-        passed: false,
-      });
+      actualOutput = result.stdout || "";
+      passed = actualOutput.trim() === expectedOutput.trim();
     }
+
+    response.push({
+      input,
+      output: actualOutput,
+      expectedOutput,
+      passed,
+    });
   }
 
   return { response };
@@ -89,6 +83,12 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
   const testCases = await storage.listTestCases(problemId); // List all test cases for the problem
   const results = [];
   let allPassed = true;
+  let finalStatus = "accepted";
+  let maxTime = 0;
+  let maxMemory = 0;
+  let finalExitCode = 0;
+  let finalCompileOutput = "";
+  let finalStderr = "";
 
   for (const tc of testCases) {
     const inputContent = await storage.getInputContent(problemId, tc.input);
@@ -112,17 +112,51 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
         }
       );
 
-      const actualOutput = response_data.data?.output;
-      if (typeof actualOutput !== "string") {
-        console.error(
-          "Unexpected response from code runner:",
-          response_data.data,
-        );
+      const result = response_data.data;
+      if (!result || typeof result.status !== "string") {
+        console.error("Unexpected response from code runner:", result);
         throw new AppError("Code runner did not return valid output.", 500);
       }
 
-      const normalizedOutput = actualOutput.trim();
-      const passed = normalizedOutput === expectedOutputContent.trim(); // Compare the actual output with the expected output
+      if (typeof result.executionTime === "number" && result.executionTime > maxTime) {
+        maxTime = result.executionTime;
+      }
+      if (typeof result.memoryUsage === "number" && result.memoryUsage > maxMemory) {
+        maxMemory = result.memoryUsage;
+      }
+
+      let actualOutput = "";
+      let passed = false;
+
+      if (result.status === "compile_error") {
+        actualOutput = result.compileOutput || "Compile Error";
+        finalStatus = "compile_error";
+        finalExitCode = typeof result.exitCode === "number" ? result.exitCode : 111;
+        finalCompileOutput = result.compileOutput || "";
+      } else if (result.status === "time_limit_exceeded") {
+        actualOutput = "Time Limit Exceeded";
+        finalStatus = "time_limit_exceeded";
+        finalExitCode = typeof result.exitCode === "number" ? result.exitCode : 124;
+        finalStderr = result.stderr || "Time Limit Exceeded";
+      } else if (result.status === "memory_limit_exceeded") {
+        actualOutput = "Memory Limit Exceeded";
+        finalStatus = "memory_limit_exceeded";
+        finalExitCode = typeof result.exitCode === "number" ? result.exitCode : 137;
+        finalStderr = result.stderr || "Memory Limit Exceeded";
+      } else if (result.status === "runtime_error") {
+        actualOutput = result.stderr || "Runtime Error";
+        finalStatus = "runtime_error";
+        finalExitCode = typeof result.exitCode === "number" ? result.exitCode : 0;
+        finalStderr = result.stderr || "";
+      } else {
+        actualOutput = result.stdout || "";
+        passed = actualOutput.trim() === expectedOutputContent.trim();
+        if (!passed) {
+          finalStatus = "wrong_answer";
+          finalExitCode = typeof result.exitCode === "number" ? result.exitCode : 0;
+          finalStderr = result.stderr || "";
+        }
+      }
 
       // Store the result for this test case
       results.push({
@@ -132,7 +166,7 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
         passed,
       });
 
-      if (!passed) {
+      if (!passed || finalStatus !== "accepted") {
         allPassed = false;
         break; // Stop further testing if one test case fails
       }
@@ -153,13 +187,20 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
     problem: problemId,
     code: code,
     language: language,
-    status: allPassed ? "accepted" : "rejected",
+    status: finalStatus,
+    executionTime: maxTime,
+    memoryUsage: maxMemory,
+    exitCode: finalExitCode,
+    compileOutput: finalCompileOutput,
+    stderr: finalStderr,
   });
 
   return {
-    status: allPassed ? "accepted" : "rejected",
+    status: finalStatus,
     results,
     submissionId: submission._id,
+    executionTime: maxTime,
+    memoryUsage: maxMemory,
   };
 };
 

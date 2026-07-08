@@ -78,6 +78,15 @@ export const getOverview = async (userId) => {
       currentStreak = 0;
     }
   }
+
+  // Calculate average runtime and memory
+  const acceptedWithMetrics = acceptedSubmissions.filter(s => typeof s.executionTime === "number" && s.executionTime > 0);
+  const totalRuntime = acceptedWithMetrics.reduce((sum, s) => sum + s.executionTime, 0);
+  const averageRuntime = acceptedWithMetrics.length > 0 ? totalRuntime / acceptedWithMetrics.length : 0;
+
+  const acceptedWithMemory = acceptedSubmissions.filter(s => typeof s.memoryUsage === "number" && s.memoryUsage > 0);
+  const totalMemory = acceptedWithMemory.reduce((sum, s) => sum + s.memoryUsage, 0);
+  const averageMemory = acceptedWithMemory.length > 0 ? totalMemory / acceptedWithMemory.length : 0;
   
   return {
     solvedCount,
@@ -85,6 +94,8 @@ export const getOverview = async (userId) => {
     acceptanceRate: parseFloat(acceptanceRate.toFixed(1)),
     currentStreak,
     longestStreak,
+    averageRuntime: Math.round(averageRuntime),
+    averageMemory: Math.round(averageMemory),
   };
 };
 
@@ -214,6 +225,8 @@ export const getRecentActivity = async (userId) => {
       status: sub.status,
       language: sub.language,
       createdAt: sub.createdAt,
+      executionTime: sub.executionTime,
+      memoryUsage: sub.memoryUsage,
     };
   });
 };
