@@ -167,6 +167,28 @@ export const useUserListStore = create((set, get) => ({
     }
   },
 
+  importUserList: async (id) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      const response = await api.post(`/userlists/${id}/import`);
+      set((state) => ({
+        userLists: [...state.userLists, response.data],
+        isLoading: false,
+        isSuccess: true,
+      }));
+      return true;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+      return false;
+    }
+  },
+
   reset: () => {
     set({
       currentList: null,

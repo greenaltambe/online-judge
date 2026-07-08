@@ -7,6 +7,7 @@ import {
   deleteUserList,
   addProblemToUserList,
   removeProblemFromUserList,
+  importUserList,
 } from "../controllers/userList.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -21,5 +22,6 @@ router.delete("/:id", protect, deleteUserList);
 
 router.post("/:id/problems", protect, addProblemToUserList);
 router.delete("/:id/problems/:problemId", protect, removeProblemFromUserList);
+router.post("/:id/import", protect, importUserList);
 
 export default router;

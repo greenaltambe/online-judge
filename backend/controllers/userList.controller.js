@@ -70,3 +70,11 @@ export const removeProblemFromUserList = asyncHandler(async (req, res) => {
   );
   res.status(200).json(result);
 });
+
+// @desc    Import/clone a public user list
+// @route   POST /api/userlists/:id/import
+// @access  Private
+export const importUserList = asyncHandler(async (req, res) => {
+  const result = await userListService.importUserList(req.params.id, req.user._id);
+  res.status(201).json(result);
+});

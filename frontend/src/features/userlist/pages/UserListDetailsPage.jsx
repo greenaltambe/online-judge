@@ -4,13 +4,17 @@ import { Container, Title, Text, Button, Group, Card, Badge, Table, ActionIcon, 
 import { IconArrowLeft, IconTrash, IconLock, IconWorld, IconBookmark, IconChevronRight, IconInfoCircle } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useUserListStore } from "../../../stores/userListStore";
+import { useAuthStore } from "../../../stores/authStore";
 import { getDifficultyBadge } from "../../problems/utils/difficulty";
 import { PROBLEM_TAG_MAP } from "../../problems/data/problemTags";
 
 const UserListDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentList, getUserListById, removeProblemFromList, isLoading, isError, message, reset } = useUserListStore();
+  const { currentList, getUserListById, removeProblemFromList, importUserList, isLoading, isError, message, reset } = useUserListStore();
+  const { user } = useAuthStore();
+
+  const isOwner = user && currentList && String(user._id) === String(currentList.owner);
 
   useEffect(() => {
     getUserListById(id);
@@ -18,6 +22,24 @@ const UserListDetailsPage = () => {
       reset();
     };
   }, [id, getUserListById, reset]);
+
+  const handleImportList = async () => {
+    const success = await importUserList(id);
+    if (success) {
+      notifications.show({
+        title: "List Imported",
+        message: `Successfully imported "${currentList.name}" into your lists.`,
+        color: "green",
+      });
+      navigate("/userlists");
+    } else {
+      notifications.show({
+        title: "Error",
+        message: message || "Failed to import list.",
+        color: "red",
+      });
+    }
+  };
 
   const handleRemoveProblem = async (e, problemId, problemTitle) => {
     e.preventDefault();
@@ -102,9 +124,23 @@ const UserListDetailsPage = () => {
               </Text>
             </Stack>
 
-            <Badge size="lg" variant="outline" color="blue" radius="md">
-              {currentList.problems ? currentList.problems.length : 0} {currentList.problems?.length === 1 ? "Problem" : "Problems"}
-            </Badge>
+            <Group gap="sm" align="center">
+              {!isOwner && currentList.isPublic && (
+                <Button
+                  variant="light"
+                  color="blue"
+                  leftSection={<IconBookmark size={16} />}
+                  onClick={handleImportList}
+                  loading={isLoading}
+                  radius="md"
+                >
+                  Import List
+                </Button>
+              )}
+              <Badge size="lg" variant="outline" color="blue" radius="md" h={36} style={{ display: "flex", alignItems: "center" }}>
+                {currentList.problems ? currentList.problems.length : 0} {currentList.problems?.length === 1 ? "Problem" : "Problems"}
+              </Badge>
+            </Group>
           </Group>
 
           {/* Problems List Section */}
@@ -115,7 +151,7 @@ const UserListDetailsPage = () => {
                   <Table.Tr>
                     <Table.Th style={{ fontWeight: 600 }}>Problem Challenge</Table.Th>
                     <Table.Th style={{ width: 150, fontWeight: 600 }}>Difficulty</Table.Th>
-                    <Table.Th style={{ width: 120, textAlign: "right", fontWeight: 600 }}>Action</Table.Th>
+                    {isOwner && <Table.Th style={{ width: 120, textAlign: "right", fontWeight: 600 }}>Action</Table.Th>}
                     <Table.Th width={60} />
                   </Table.Tr>
                 </Table.Thead>
@@ -147,20 +183,22 @@ const UserListDetailsPage = () => {
 
                       <Table.Td>{getDifficultyBadge(problem.difficulty)}</Table.Td>
 
-                      <Table.Td
-                        style={{ textAlign: "right" }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Tooltip label="Remove from List">
-                          <ActionIcon
-                            color="red"
-                            variant="light"
-                            onClick={(e) => handleRemoveProblem(e, problem._id, problem.title)}
-                          >
-                            <IconTrash size={16} />
-                          </ActionIcon>
-                        </Tooltip>
-                      </Table.Td>
+                      {isOwner && (
+                        <Table.Td
+                          style={{ textAlign: "right" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Tooltip label="Remove from List">
+                            <ActionIcon
+                              color="red"
+                              variant="light"
+                              onClick={(e) => handleRemoveProblem(e, problem._id, problem.title)}
+                            >
+                              <IconTrash size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                        </Table.Td>
+                      )}
 
                       <Table.Td style={{ textAlign: "right" }}>
                         <IconChevronRight

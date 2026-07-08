@@ -162,3 +162,35 @@ export const deleteUserList = async (userListId, owner) => {
   return { message: "User list deleted successfully" };
 };
 
+export const importUserList = async (userListId, targetUserId) => {
+  const sourceList = await UserList.findOne({
+    _id: userListId,
+    $or: [{ owner: targetUserId }, { isPublic: true }],
+  });
+  if (!sourceList) {
+    throw new AppError("Source user list not found or not public", 404);
+  }
+
+  let newName = sourceList.name;
+  let count = 0;
+  // Resolve name collisions
+  while (true) {
+    const existing = await UserList.findOne({ owner: targetUserId, name: newName });
+    if (!existing) break;
+    count++;
+    newName = `${sourceList.name} (${count})`;
+  }
+
+  const newDescription = sourceList.description || "Imported list";
+
+  const newUserList = new UserList({
+    owner: targetUserId,
+    name: newName,
+    description: newDescription,
+    isPublic: false, // Cloned list is private by default
+    problems: [...sourceList.problems],
+  });
+  await newUserList.save();
+  return newUserList;
+};
+
