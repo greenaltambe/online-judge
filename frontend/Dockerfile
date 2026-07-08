@@ -23,6 +23,10 @@ RUN npm ci
 
 COPY . .
 
+# Accept build argument for relative API path in production
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build for production
 RUN npm run build
 

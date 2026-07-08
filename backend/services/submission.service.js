@@ -5,21 +5,17 @@ import axios from "axios";
 import { AppError } from "../utils/errors.js";
 
 export const runSolution = async ({ problemId, code, language }) => {
-  // Validate that all required fields are present
   if (!problemId || !code || !language) {
     throw new AppError("One or more fields are missing while submitting solution", 400);
   }
 
-  // Fetch the problem from the database
   const problem = await Problem.findById(problemId);
   console.log(problem);
 
-  // Validate that the problem exists
   if (!problem) {
     throw new AppError("Problem not found while submitting solution", 400);
   }
 
-  // Get the test cases for the problem (basic test cases)
   const testCases = problem.testCases;
   const response = [];
 
@@ -80,7 +76,7 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
     throw new AppError("Problem not found while submitting solution", 400);
   }
 
-  const testCases = await storage.listTestCases(problemId); // List all test cases for the problem
+  const testCases = await storage.listTestCases(problemId);
   const results = [];
   let allPassed = true;
   let finalStatus = "accepted";
@@ -158,7 +154,6 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
         }
       }
 
-      // Store the result for this test case
       results.push({
         input: inputContent,
         output: actualOutput,
@@ -168,7 +163,7 @@ export const submitSolution = async ({ userId, problemId, code, language }) => {
 
       if (!passed || finalStatus !== "accepted") {
         allPassed = false;
-        break; // Stop further testing if one test case fails
+        break;
       }
     } catch (error) {
       console.error(

@@ -7,13 +7,12 @@ import { PROBLEM_TAG_IDS } from "../constants/problemTags.js";
 function getTestPairs(inputs, outputs) {
   const pairs = [];
 
-  // Match input and output files based on their naming convention
   for (const input of inputs) {
-    const match = input.originalname.match(/input_(\d+)/); // Extract the number from the input file name
+    const match = input.originalname.match(/input_(\d+)/);
     if (!match) continue;
 
     const id = match[1];
-    const output = outputs.find((o) => o.originalname === `output_${id}.txt`); // Find the corresponding output file
+    const output = outputs.find((o) => o.originalname === `output_${id}.txt`);
 
     if (output) {
       pairs.push({ input, output, id });
@@ -182,7 +181,6 @@ export const createProblem = async ({ title, description, difficulty, testCases,
     throw new AppError("Mismatched input/output submission test files", 400);
   }
 
-  // map input 1 with output 1, input 2 with output 2, etc. based on the naming convention
   const testPairs = getTestPairs(inputs, outputs);
   if (testPairs.length !== inputs.length) {
     throw new AppError("Mismatched number of test pairs", 400);
@@ -221,9 +219,7 @@ export const updateProblem = async (id, updateData) => {
     try {
       parsedTags = typeof parsedTags === "string" ? JSON.parse(parsedTags) : parsedTags;
     } catch (e) {
-      if (Array.isArray(parsedTags)) {
-        // already array
-      } else {
+      if (!Array.isArray(parsedTags)) {
         parsedTags = [parsedTags];
       }
     }
@@ -260,11 +256,10 @@ export const deleteProblem = async (id) => {
     throw new AppError("Problem not found", 400);
   }
 
-  await problem.deleteOne(); // This deletes the problem from the database
+  await problem.deleteOne();
 
   try {
-    // Delete the test cases from storage
-    await storage.deleteTestCases(problem._id); // This deletes the test cases from the storage
+    await storage.deleteTestCases(problem._id);
   } catch (storageError) {
     console.error(`Failed to delete test cases for problem ${id} from storage:`, storageError);
   }

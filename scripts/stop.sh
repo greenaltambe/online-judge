@@ -1,6 +1,11 @@
 #!/bin/bash
 
-echo "Stopping all services..."
-docker compose down
+echo "Stopping services..."
 
-echo "All services stopped"
+if [ -f docker-compose.prod.yml ]; then
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+else
+    docker compose down
+fi
+
+echo "Services stopped."

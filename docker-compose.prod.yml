@@ -1,0 +1,99 @@
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+
+    volumes:
+      - mongodb_data:/data/db
+
+    environment:
+      MONGO_INITDB_DATABASE: online-judge
+
+    networks:
+      - oj-network
+
+  minio:
+    image: minio/minio:latest
+    restart: always
+
+    volumes:
+      - minio_data:/data
+
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+
+    command: server /data --console-address ":9001"
+
+    networks:
+      - oj-network
+
+  backend:
+    build:
+      context: ./backend
+
+    restart: always
+
+    env_file:
+      - .env.production
+
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/online-judge
+      MINIO_ENDPOINT: http://minio:9000
+      JUDGE_SERVICE_URL: http://judge:5010
+
+    volumes:
+      - backend_problems:/app/problems
+
+    depends_on:
+      - mongodb
+      - minio
+
+    networks:
+      - oj-network
+
+  judge:
+    build:
+      context: ./judge
+
+    restart: always
+
+    env_file:
+      - .env.production
+
+    environment:
+      PORT: 5010
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    privileged: true
+
+    networks:
+      - oj-network
+
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+      args:
+        - VITE_API_URL=/api
+
+    restart: always
+
+    ports:
+      - "80:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - oj-network
+
+networks:
+  oj-network:
+
+volumes:
+  mongodb_data:
+  minio_data:
+  backend_problems:

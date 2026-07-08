@@ -5,7 +5,7 @@ RUN apk add --no-cache docker-cli
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --omit=dev
 
 COPY . .
 
@@ -13,4 +13,4 @@ RUN mkdir -p temp && chmod 777 temp
 
 EXPOSE 5010
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

@@ -4,7 +4,7 @@ echo "Starting Online Judge in development mode..."
 
 # Build judge executor image (the Debian one with compilers)
 echo "Building judge executor Docker image..."
-docker build -f judge/Dockerfile.executor -t judge judge/
+docker build -f judge/Dockerfile.executor -t oj-executor judge/
 
 # Check if .env exists
 if [ ! -f .env ]; then

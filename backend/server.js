@@ -26,18 +26,18 @@ if (!healthy) {
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-app.use(cors()); // Enable CORS for all routes
-app.use(express.json()); // Middleware to parse JSON bodies
-app.use(express.urlencoded({ extended: false })); // Middleware to parse URL-encoded bodies
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.use("/api/auth", authRouter); // for login, register, logout
-app.use("/api/problems", problemsRouter); // for all problems related routes
-app.use("/api/userlists", userListsRouter); // for user lists related routes
-app.use("/api/stats", statsRouter); // for user statistics routes
-app.use("/api/discussions", discussionRouter); // for problem discussions routes
-app.use("/api/notes", userNoteRouter); // for user private notes routes
+app.use("/api/auth", authRouter);
+app.use("/api/problems", problemsRouter);
+app.use("/api/userlists", userListsRouter);
+app.use("/api/stats", statsRouter);
+app.use("/api/discussions", discussionRouter);
+app.use("/api/notes", userNoteRouter);
 
-app.use(errorHandler); // Custom error handling middleware
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
