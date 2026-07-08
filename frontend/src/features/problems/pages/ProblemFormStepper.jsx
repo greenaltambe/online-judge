@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Stepper, LoadingOverlay, Stack, Title, Text } from "@mantine/core";
+import { Container, Stepper, LoadingOverlay, Stack, Title, Text, SegmentedControl, FileInput, Radio, Card, Table, Badge, Divider, Alert, Button, Group } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { IconFileZip, IconUpload, IconCheck, IconX, IconInfoCircle } from "@tabler/icons-react";
 import { useProblemStore } from "../../../stores/problemStore";
 import { marked } from "marked";
 
@@ -25,6 +26,7 @@ const ProblemFormStepper = ({ mode = "create" }) => {
     getProblemById,
     createProblem,
     updateProblem,
+    importProblems,
     isLoading,
     isError,
     isSuccess,
@@ -42,6 +44,12 @@ const ProblemFormStepper = ({ mode = "create" }) => {
   const [inputsFiles, setInputsFiles] = useState([]);
   const [outputsFiles, setOutputsFiles] = useState([]);
   const [tags, setTags] = useState([]);
+
+  // Import states
+  const [creationMethod, setCreationMethod] = useState("manual");
+  const [zipFile, setZipFile] = useState(null);
+  const [importType, setImportType] = useState("single");
+  const [importResult, setImportResult] = useState(null);
 
   // Fetch problem details if editing
   useEffect(() => {
@@ -194,6 +202,33 @@ const ProblemFormStepper = ({ mode = "create" }) => {
     }
   };
 
+  const handleImport = async (e) => {
+    e.preventDefault();
+    if (!zipFile) {
+      notifications.show({
+        title: "Validation Error",
+        message: "Please select a ZIP file to import.",
+        color: "red",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", zipFile);
+    formData.append("type", importType);
+
+    const result = await importProblems(formData);
+    if (result) {
+      setImportResult(result);
+      notifications.show({
+        title: "Import Completed",
+        message: `Processed archive: ${result.summary.imported} imported, ${result.summary.failed} failed.`,
+        color: "green",
+      });
+      setZipFile(null);
+    }
+  };
+
   const nextStep = () => {
     if (activeStep === 0 && !title.trim()) {
       notifications.show({ title: "Validation Error", message: "Please add a Title.", color: "red" });
@@ -236,79 +271,251 @@ const ProblemFormStepper = ({ mode = "create" }) => {
           </Text>
         </div>
 
-        <Stepper active={activeStep} onStepClick={setActiveStep} color="blue" size="sm">
-          {/* Step 1: Basic Information */}
-          <Stepper.Step label="Basic Information" description="Set Title and difficulty">
-            <BasicInfoStep
-              title={title}
-              setTitle={setTitle}
-              difficulty={difficulty}
-              setDifficulty={setDifficulty}
-              tags={tags}
-              setTags={setTags}
+        {mode === "create" && (
+          <SegmentedControl
+            value={creationMethod}
+            onChange={(val) => {
+              setCreationMethod(val);
+              setImportResult(null);
+            }}
+            data={[
+              { label: "Manual Creation", value: "manual" },
+              { label: "Import ZIP", value: "import" },
+            ]}
+            size="md"
+            radius="md"
+            color="blue"
+            style={{ maxWidth: 300 }}
+          />
+        )}
+
+        {mode === "create" && creationMethod === "import" ? (
+          <Stack gap="lg">
+            <Card withBorder padding="lg" radius="md">
+              <form onSubmit={handleImport}>
+                <Stack gap="md">
+                  <Title order={3} size="h4">
+                    Import Problems from Archive
+                  </Title>
+                  <Text size="sm" c="dimmed">
+                    Upload a ZIP archive containing problems structured in the GreenCode Problem Package format.
+                  </Text>
+
+                  <Divider my="xs" />
+
+                  <Radio.Group
+                    value={importType}
+                    onChange={setImportType}
+                    label="Import Type"
+                    description="Choose whether the ZIP package contains a single problem or a bulk collection of problems"
+                    required
+                  >
+                    <Group mt="xs" gap="xl">
+                      <Radio value="single" label="Single Problem (problem.zip)" color="blue" />
+                      <Radio value="bulk" label="Bulk Import (algorithms.zip)" color="blue" />
+                    </Group>
+                  </Radio.Group>
+
+                  <FileInput
+                    label="Problem ZIP Archive"
+                    placeholder="Click to select or drag problem ZIP file"
+                    accept=".zip"
+                    leftSection={<IconFileZip size={16} />}
+                    value={zipFile}
+                    onChange={setZipFile}
+                    required
+                    clearable
+                    mt="xs"
+                  />
+
+                  {importType === "single" ? (
+                    <Alert icon={<IconInfoCircle size={16} />} title="Expected Single Folder Structure" color="blue" variant="light" mt="xs">
+                      <Text size="xs" style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}>
+                        problem.zip{"\n"}
+                        ├── problem.json      # Metadata (title, description, difficulty, tags){"\n"}
+                        └── tests/            # Tests directory{"\n"}
+                            ├── input_1.txt   # Input testcase 1{"\n"}
+                            ├── output_1.txt  # Output testcase 1{"\n"}
+                            ├── input_2.txt{"\n"}
+                            └── output_2.txt
+                      </Text>
+                    </Alert>
+                  ) : (
+                    <Alert icon={<IconInfoCircle size={16} />} title="Expected Bulk Folder Structure" color="blue" variant="light" mt="xs">
+                      <Text size="xs" style={{ fontFamily: "monospace", whiteSpace: "pre-wrap" }}>
+                        algorithms.zip{"\n"}
+                        ├── two-sum/{"\n"}
+                        │   ├── problem.json{"\n"}
+                        │   └── tests/{"\n"}
+                        │       ├── input_1.txt{"\n"}
+                        │       └── output_1.txt{"\n"}
+                        └── binary-search/{"\n"}
+                            ├── problem.json{"\n"}
+                            └── tests/
+                      </Text>
+                    </Alert>
+                  )}
+
+                  <Group justify="end" mt="md">
+                    <Button
+                      type="submit"
+                      color="blue"
+                      leftSection={<IconUpload size={16} />}
+                      loading={isLoading}
+                      disabled={!zipFile}
+                    >
+                      Import Problems
+                    </Button>
+                  </Group>
+                </Stack>
+              </form>
+            </Card>
+
+            {/* Results Panel */}
+            {importResult && (
+              <Card withBorder padding="lg" radius="md">
+                <Stack gap="md">
+                  <Title order={3} size="h4">
+                    Import Summary
+                  </Title>
+                  <Group gap="md">
+                    <Badge color="blue" size="lg">
+                      Total: {importResult.summary.total}
+                    </Badge>
+                    <Badge color="green" size="lg">
+                      Imported: {importResult.summary.imported}
+                    </Badge>
+                    <Badge color={importResult.summary.failed > 0 ? "red" : "gray"} size="lg">
+                      Failed: {importResult.summary.failed}
+                    </Badge>
+                  </Group>
+
+                  <Table verticalSpacing="sm" withTableBorder withColumnBorders mt="xs">
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th style={{ fontWeight: 600 }}>Problem / Folder</Table.Th>
+                        <Table.Th style={{ width: 120, fontWeight: 600 }}>Status</Table.Th>
+                        <Table.Th style={{ fontWeight: 600 }}>Details / Error</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {importResult.results.map((res, index) => (
+                        <Table.Tr key={index}>
+                          <Table.Td style={{ fontWeight: 600 }}>{res.title}</Table.Td>
+                          <Table.Td>
+                            <Badge
+                              color={res.status === "imported" ? "green" : "red"}
+                              leftSection={res.status === "imported" ? <IconCheck size={10} /> : <IconX size={10} />}
+                            >
+                              {res.status}
+                            </Badge>
+                          </Table.Td>
+                          <Table.Td>
+                            {res.status === "imported" ? (
+                              <Text size="xs" c="green">
+                                Problem successfully published
+                              </Text>
+                            ) : (
+                              <Text size="xs" c="red">
+                                {res.error}
+                              </Text>
+                            )}
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+
+                  <Group justify="end" mt="md">
+                    <Button
+                      variant="light"
+                      color="blue"
+                      onClick={() => navigate("/problems")}
+                    >
+                      View Problems List
+                    </Button>
+                  </Group>
+                </Stack>
+              </Card>
+            )}
+          </Stack>
+        ) : (
+          <>
+            <Stepper active={activeStep} onStepClick={setActiveStep} color="blue" size="sm">
+              {/* Step 1: Basic Information */}
+              <Stepper.Step label="Basic Information" description="Set Title and difficulty">
+                <BasicInfoStep
+                  title={title}
+                  setTitle={setTitle}
+                  difficulty={difficulty}
+                  setDifficulty={setDifficulty}
+                  tags={tags}
+                  setTags={setTags}
+                />
+              </Stepper.Step>
+
+              {/* Step 2: Markdown Description */}
+              <Stepper.Step label="Description" description="Markdown workspace">
+                <DescriptionStep
+                  description={description}
+                  setDescription={setDescription}
+                  parsedDescription={getParsedDescription()}
+                />
+              </Stepper.Step>
+
+              {/* Step 3: Examples */}
+              <Stepper.Step label="Examples" description="Set visual examples">
+                <ExamplesStep
+                  testCases={testCases}
+                  onAddExample={handleAddExample}
+                  onRemoveExample={handleRemoveExample}
+                  onExampleChange={handleExampleChange}
+                />
+              </Stepper.Step>
+
+              {/* Step 4: Submission Files (Only in Create Mode) */}
+              {mode === "create" ? (
+                <Stepper.Step label="Submission Files" description="Upload compilation cases">
+                  <UploadFilesStep
+                    inputsFiles={inputsFiles}
+                    outputsFiles={outputsFiles}
+                    onDropInputs={handleDropInputs}
+                    onDropOutputs={handleDropOutputs}
+                    onRemoveInputFile={handleRemoveInputFile}
+                    onRemoveOutputFile={handleRemoveOutputFile}
+                  />
+                </Stepper.Step>
+              ) : null}
+
+              {/* Step 5 / 4: Preview */}
+              <Stepper.Step label="Preview" description="Verify challenge rendering">
+                <PreviewStep
+                  title={title}
+                  difficulty={difficulty}
+                  difficultyColor={getDifficultyColor(difficulty)}
+                  parsedDescription={getParsedDescription()}
+                  testCases={testCases}
+                  tags={tags}
+                />
+              </Stepper.Step>
+
+              {/* Final Step: Finish & Publish */}
+              <Stepper.Completed>
+                <CompletedStep mode={mode} />
+              </Stepper.Completed>
+            </Stepper>
+
+            {/* Stepper Navigation Buttons */}
+            <StepperNavigation
+              activeStep={activeStep}
+              mode={mode}
+              isLoading={isLoading}
+              onBack={prevStep}
+              onNext={nextStep}
+              onSave={handleSave}
             />
-          </Stepper.Step>
-
-          {/* Step 2: Markdown Description */}
-          <Stepper.Step label="Description" description="Markdown workspace">
-            <DescriptionStep
-              description={description}
-              setDescription={setDescription}
-              parsedDescription={getParsedDescription()}
-            />
-          </Stepper.Step>
-
-          {/* Step 3: Examples */}
-          <Stepper.Step label="Examples" description="Set visual examples">
-            <ExamplesStep
-              testCases={testCases}
-              onAddExample={handleAddExample}
-              onRemoveExample={handleRemoveExample}
-              onExampleChange={handleExampleChange}
-            />
-          </Stepper.Step>
-
-          {/* Step 4: Submission Files (Only in Create Mode) */}
-          {mode === "create" ? (
-            <Stepper.Step label="Submission Files" description="Upload compilation cases">
-              <UploadFilesStep
-                inputsFiles={inputsFiles}
-                outputsFiles={outputsFiles}
-                onDropInputs={handleDropInputs}
-                onDropOutputs={handleDropOutputs}
-                onRemoveInputFile={handleRemoveInputFile}
-                onRemoveOutputFile={handleRemoveOutputFile}
-              />
-            </Stepper.Step>
-          ) : null}
-
-          {/* Step 5 / 4: Preview */}
-          <Stepper.Step label="Preview" description="Verify challenge rendering">
-            <PreviewStep
-              title={title}
-              difficulty={difficulty}
-              difficultyColor={getDifficultyColor(difficulty)}
-              parsedDescription={getParsedDescription()}
-              testCases={testCases}
-              tags={tags}
-            />
-          </Stepper.Step>
-
-          {/* Final Step: Finish & Publish */}
-          <Stepper.Completed>
-            <CompletedStep mode={mode} />
-          </Stepper.Completed>
-        </Stepper>
-
-        {/* Stepper Navigation Buttons */}
-        <StepperNavigation
-          activeStep={activeStep}
-          mode={mode}
-          isLoading={isLoading}
-          onBack={prevStep}
-          onNext={nextStep}
-          onSave={handleSave}
-        />
+          </>
+        )}
       </Stack>
     </Container>
   );

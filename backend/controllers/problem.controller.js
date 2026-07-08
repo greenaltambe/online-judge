@@ -1,12 +1,13 @@
 import asyncHandler from "express-async-handler";
 import * as problemService from "../services/problem.service.js";
 import * as submissionService from "../services/submission.service.js";
+import * as importService from "../services/import.service.js";
 
 // @desc    Get all problems
 // @route   GET /api/problems
 // @access  Private
 export const getProblems = asyncHandler(async (req, res) => {
-  const result = await problemService.getAllProblems();
+  const result = await problemService.getAllProblems(req.query);
   res.status(200).json(result);
 });
 
@@ -80,4 +81,15 @@ export const submitSolution = asyncHandler(async (req, res) => {
 export const getSubmissions = asyncHandler(async (req, res) => {
   const result = await submissionService.getSubmissions(req.params.id);
   res.status(200).json(result);
+});
+
+// @desc    Import problems from a ZIP archive
+// @route   POST /api/problems/import
+// @access  Private/Admin
+export const importProblems = asyncHandler(async (req, res) => {
+  const result = await importService.importProblems({
+    zipBuffer: req.file?.buffer,
+    type: req.body.type,
+  });
+  res.status(201).json(result);
 });

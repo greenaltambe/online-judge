@@ -23,9 +23,93 @@ function getTestPairs(inputs, outputs) {
   return pairs;
 }
 
-export const getAllProblems = async () => {
-  const problems = await Problem.find();
-  return { problems };
+export const getAllProblems = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  difficulty = "all",
+  tags = "",
+  sortBy = "newest",
+} = {}) => {
+  const pageNum = parseInt(page, 10) || 1;
+  const limitNum = parseInt(limit, 10) || 10;
+  const skipNum = (pageNum - 1) * limitNum;
+
+  // Build match query
+  const matchQuery = {};
+
+  if (search) {
+    matchQuery.title = { $regex: search, $options: "i" };
+  }
+
+  if (difficulty && difficulty !== "all") {
+    matchQuery.difficulty = difficulty.toLowerCase();
+  }
+
+  if (tags) {
+    const tagsArray = Array.isArray(tags)
+      ? tags
+      : tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+    if (tagsArray.length > 0) {
+      matchQuery.tags = { $all: tagsArray };
+    }
+  }
+
+  // Build aggregation pipeline
+  const pipeline = [{ $match: matchQuery }];
+
+  // Sorting
+  if (sortBy === "title") {
+    pipeline.push({ $sort: { title: 1 } });
+  } else if (sortBy === "difficulty") {
+    // Weighted difficulty sorting (easy -> medium -> hard)
+    pipeline.push({
+      $addFields: {
+        difficultyWeight: {
+          $cond: {
+            if: { $eq: [{ $toLower: "$difficulty" }, "easy"] },
+            then: 1,
+            else: {
+              $cond: {
+                if: { $eq: [{ $toLower: "$difficulty" }, "medium"] },
+                then: 2,
+                else: 3,
+              },
+            },
+          },
+        },
+      },
+    });
+    pipeline.push({ $sort: { difficultyWeight: 1, createdAt: -1 } });
+  } else {
+    // default: newest first
+    pipeline.push({ $sort: { createdAt: -1 } });
+  }
+
+  // Facet for pagination and metadata
+  pipeline.push({
+    $facet: {
+      metadata: [{ $count: "total" }],
+      data: [{ $skip: skipNum }, { $limit: limitNum }],
+    },
+  });
+
+  const aggregationResult = await Problem.aggregate(pipeline);
+
+  const totalProblems = aggregationResult[0]?.metadata[0]?.total || 0;
+  const problems = aggregationResult[0]?.data || [];
+  const totalPages = Math.ceil(totalProblems / limitNum);
+
+  return {
+    problems,
+    currentPage: pageNum,
+    totalPages,
+    totalProblems,
+    limit: limitNum,
+  };
 };
 
 export const getProblemById = async (id, userId) => {

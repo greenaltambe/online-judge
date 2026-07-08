@@ -3,17 +3,27 @@ import api from "../lib/api";
 
 export const useProblemStore = create((set) => ({
   problems: [],
+  totalPages: 1,
+  currentPage: 1,
+  totalProblems: 0,
   currentProblem: null,
   isLoading: false,
   isError: false,
   isSuccess: false,
   message: "",
 
-  getProblems: async () => {
+  getProblems: async (params = {}) => {
     set({ isLoading: true, isError: false, isSuccess: false, message: "" });
     try {
-      const response = await api.get("/problems");
-      set({ problems: response.data.problems || [], isLoading: false, isSuccess: true });
+      const response = await api.get("/problems", { params });
+      set({
+        problems: response.data.problems || [],
+        totalPages: response.data.totalPages || 1,
+        currentPage: response.data.currentPage || 1,
+        totalProblems: response.data.totalProblems || 0,
+        isLoading: false,
+        isSuccess: true,
+      });
     } catch (error) {
       const message =
         (error.response &&
@@ -109,6 +119,28 @@ export const useProblemStore = create((set) => ({
         error.toString();
       set({ isLoading: false, isError: true, message });
       return false;
+    }
+  },
+
+  importProblems: async (formData) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      const response = await api.post("/problems/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      set({ isLoading: false, isSuccess: true });
+      return response.data;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+      return null;
     }
   },
 

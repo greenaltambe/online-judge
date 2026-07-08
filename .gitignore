@@ -45,3 +45,6 @@ data/
 # Logs
 *.log
 logs/
+
+data-formater-scripts/
+**/temp_import/

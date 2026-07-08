@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Container, Stack } from "@mantine/core";
+import { Container, Stack, Pagination, Group } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useNavigate } from "react-router-dom";
+import { useDebouncedValue } from "@mantine/hooks";
 
 import { useProblemStore } from "../../../stores/problemStore";
 import { useAuthStore } from "../../../stores/authStore";
-
-import { useProblemFilters } from "../hooks/useProblemFilters";
 
 import ProblemsHeader from "../components/problem-list/ProblemsHeader";
 import ProblemFilters from "../components/problem-list/ProblemFilters";
@@ -21,6 +20,8 @@ const ProblemsPage = () => {
 
   const {
     problems,
+    totalPages,
+    totalProblems,
     getProblems,
     deleteProblem,
     isLoading,
@@ -29,10 +30,13 @@ const ProblemsPage = () => {
     reset,
   } = useProblemStore();
 
-  // Filters
+  // Filters & Pagination State
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebouncedValue(search, 300);
   const [difficulty, setDifficulty] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [tags, setTags] = useState([]);
+  const [page, setPage] = useState(1);
 
   // Delete modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -42,14 +46,29 @@ const ProblemsPage = () => {
   const [addToListModalOpen, setAddToListModalOpen] = useState(false);
   const [problemForList, setProblemForList] = useState(null);
 
-  // Fetch problems
+  // Fetch problems based on current pagination & filters
   useEffect(() => {
-    getProblems();
+    getProblems({
+      page,
+      limit: 10,
+      search: debouncedSearch,
+      difficulty,
+      tags: tags.join(","),
+      sortBy,
+    });
+  }, [page, debouncedSearch, difficulty, tags, sortBy, getProblems]);
 
+  // Clean up store on unmount
+  useEffect(() => {
     return () => {
       reset();
     };
-  }, [getProblems, reset]);
+  }, [reset]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, difficulty, tags, sortBy]);
 
   // Error notifications
   useEffect(() => {
@@ -63,14 +82,6 @@ const ProblemsPage = () => {
 
     reset();
   }, [isError, message, reset]);
-
-  // Filtered problems
-  const filteredProblems = useProblemFilters(
-    problems,
-    search,
-    difficulty,
-    sortBy,
-  );
 
   // Delete button clicked
   const handleDeleteClick = (event, problem) => {
@@ -101,6 +112,15 @@ const ProblemsPage = () => {
         message: `"${problemToDelete.title}" has been deleted successfully.`,
         color: "blue",
       });
+      // Refetch page
+      getProblems({
+        page,
+        limit: 10,
+        search: debouncedSearch,
+        difficulty,
+        tags: tags.join(","),
+        sortBy,
+      });
     }
 
     setDeleteModalOpen(false);
@@ -110,7 +130,7 @@ const ProblemsPage = () => {
   return (
     <Container size="xl" py="xl">
       <Stack gap="xl">
-        <ProblemsHeader isAdmin={user?.role === "admin"} />
+        <ProblemsHeader isAdmin={user?.role === "admin"} totalProblems={totalProblems} />
 
         <ProblemFilters
           search={search}
@@ -119,16 +139,31 @@ const ProblemsPage = () => {
           setDifficulty={setDifficulty}
           sortBy={sortBy}
           setSortBy={setSortBy}
+          tags={tags}
+          setTags={setTags}
         />
 
         <ProblemsTable
-          problems={filteredProblems}
+          problems={problems}
           isLoading={isLoading}
           isAdmin={user?.role === "admin"}
           navigate={navigate}
           onDelete={handleDeleteClick}
           onAddToList={handleAddToListClick}
         />
+
+        {totalPages > 1 && (
+          <Group justify="center" mt="md">
+            <Pagination
+              value={page}
+              onChange={setPage}
+              total={totalPages}
+              color="blue"
+              radius="md"
+              withEdges
+            />
+          </Group>
+        )}
       </Stack>
 
       <DeleteProblemModal
