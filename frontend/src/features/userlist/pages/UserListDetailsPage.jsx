@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Container, Title, Text, Button, Group, Card, Badge, Table, ActionIcon, Stack, LoadingOverlay, Tooltip, Alert } from "@mantine/core";
-import { IconArrowLeft, IconTrash, IconLock, IconWorld, IconBookmark, IconChevronRight, IconInfoCircle } from "@tabler/icons-react";
+import { Container, Title, Text, Button, Group, Card, Badge, Table, ActionIcon, Stack, LoadingOverlay, Tooltip, Alert, SimpleGrid, Modal, Progress } from "@mantine/core";
+import { IconArrowLeft, IconTrash, IconLock, IconWorld, IconBookmark, IconChevronRight, IconInfoCircle, IconBrain, IconPlayerPlay, IconRefresh } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useUserListStore } from "../../../stores/userListStore";
 import { useAuthStore } from "../../../stores/authStore";
@@ -11,8 +11,9 @@ import { PROBLEM_TAG_MAP } from "../../problems/data/problemTags";
 const UserListDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { currentList, getUserListById, removeProblemFromList, importUserList, isLoading, isError, message, reset } = useUserListStore();
+  const { currentList, getUserListById, removeProblemFromList, importUserList, resetReviewProgress, isLoading, isError, message, reset } = useUserListStore();
   const { user } = useAuthStore();
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
   const isOwner = user && currentList && String(user._id) === String(currentList.owner);
 
@@ -39,6 +40,25 @@ const UserListDetailsPage = () => {
         color: "red",
       });
     }
+  };
+
+  const handleResetProgress = async () => {
+    const success = await resetReviewProgress(id);
+    if (success) {
+      notifications.show({
+        title: "Progress Reset",
+        message: "Deck spaced repetition review states have been reset.",
+        color: "blue",
+      });
+      getUserListById(id);
+    } else {
+      notifications.show({
+        title: "Error",
+        message: message || "Failed to reset review progress.",
+        color: "red",
+      });
+    }
+    setResetConfirmOpen(false);
   };
 
   const handleRemoveProblem = async (e, problemId, problemTitle) => {
@@ -137,11 +157,73 @@ const UserListDetailsPage = () => {
                   Import List
                 </Button>
               )}
+
+              {isOwner && currentList.spacedRepetitionEnabled && (
+                <>
+                  <Button
+                    variant="filled"
+                    color="grape"
+                    leftSection={<IconPlayerPlay size={16} />}
+                    component={Link}
+                    to={`/userlists/${id}/review`}
+                    radius="md"
+                  >
+                    Review Deck
+                  </Button>
+                  <Tooltip label="Reset Deck Progress">
+                    <ActionIcon
+                      variant="light"
+                      color="red"
+                      onClick={() => setResetConfirmOpen(true)}
+                      size="lg"
+                      radius="md"
+                    >
+                      <IconRefresh size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </>
+              )}
+
               <Badge size="lg" variant="outline" color="blue" radius="md" h={36} style={{ display: "flex", alignItems: "center" }}>
                 {currentList.problems ? currentList.problems.length : 0} {currentList.problems?.length === 1 ? "Problem" : "Problems"}
               </Badge>
             </Group>
           </Group>
+
+          {/* Spaced Repetition Stats Card */}
+          {isOwner && currentList.spacedRepetitionEnabled && currentList.srStats && (
+            <Card withBorder padding="md" radius="md">
+              <SimpleGrid cols={{ base: 1, sm: 4 }} spacing="md">
+                <Stack gap={4}>
+                  <Text size="xs" c="dimmed" fw={700}>DUE TODAY</Text>
+                  <Text size="xl" fw={800} c={currentList.srStats.dueTodayCount > 0 ? "red" : "gray"}>
+                    {currentList.srStats.dueTodayCount}
+                  </Text>
+                </Stack>
+                <Stack gap={4}>
+                  <Text size="xs" c="dimmed" fw={700}>STUDIED TODAY</Text>
+                  <Text size="xl" fw={800} c="green">
+                    {currentList.srStats.studiedTodayCount}
+                  </Text>
+                </Stack>
+                <Stack gap={4}>
+                  <Text size="xs" c="dimmed" fw={700}>NEXT REVIEW</Text>
+                  <Text size="xl" fw={800} c="blue">
+                    {currentList.srStats.nextReviewDate
+                      ? new Date(currentList.srStats.nextReviewDate).toLocaleDateString()
+                      : "Completed"}
+                  </Text>
+                </Stack>
+                <Stack gap={4}>
+                  <Text size="xs" c="dimmed" fw={700}>PROGRESS</Text>
+                  <Group gap="xs" wrap="nowrap" style={{ height: "100%" }}>
+                    <Progress color="grape" value={currentList.srStats.progressPercent} size="sm" style={{ flexGrow: 1 }} />
+                    <Text size="sm" fw={700} c="grape">{currentList.srStats.progressPercent}%</Text>
+                  </Group>
+                </Stack>
+              </SimpleGrid>
+            </Card>
+          )}
 
           {/* Problems List Section */}
           {currentList.problems && currentList.problems.length > 0 ? (
@@ -218,7 +300,7 @@ const UserListDetailsPage = () => {
                 <Title order={3} fw={700}>
                   This list has no problems
                 </Title>
-                <Text size="sm" c="dimmed" maxW={400} mx="auto">
+                <Text size="sm" c="dimmed" maw={400} mx="auto">
                   Browse through the problem challenges list to add problems and practice.
                 </Text>
                 <Button component={Link} to="/problems" mt="md" radius="md">
@@ -229,6 +311,29 @@ const UserListDetailsPage = () => {
           )}
         </Stack>
       )}
+
+      {/* Reset Progress Confirmation Modal */}
+      <Modal
+        opened={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        title="Reset Review Progress"
+        centered
+        radius="md"
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            Are you sure you want to reset all review progress for this deck? All problems will return to new card status and scheduled reviews will be reset.
+          </Text>
+          <Group justify="end" mt="md">
+            <Button variant="default" onClick={() => setResetConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleResetProgress}>
+              Reset Progress
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 };

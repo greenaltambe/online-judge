@@ -4,6 +4,8 @@ import api from "../lib/api";
 export const useUserListStore = create((set, get) => ({
   userLists: [],
   currentList: null,
+  dueCards: [],
+  reviewStats: null,
   isLoading: false,
   isError: false,
   isSuccess: false,
@@ -189,9 +191,84 @@ export const useUserListStore = create((set, get) => ({
     }
   },
 
+  getDueCards: async (id) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      const response = await api.get(`/userlists/${id}/review/due`);
+      set({ dueCards: response.data || [], isLoading: false, isSuccess: true });
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+    }
+  },
+
+  getReviewStats: async (id) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      const response = await api.get(`/userlists/${id}/review/stats`);
+      set({ reviewStats: response.data, isLoading: false, isSuccess: true });
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+    }
+  },
+
+  submitReview: async (id, problemId, rating) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      const response = await api.post(`/userlists/${id}/review/${problemId}`, { rating });
+      // Update dueCards array by filtering out the completed problem
+      set((state) => ({
+        dueCards: state.dueCards.filter((card) => card.problem && card.problem._id !== problemId),
+        isLoading: false,
+        isSuccess: true,
+      }));
+      return true;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+      return false;
+    }
+  },
+
+  resetReviewProgress: async (id) => {
+    set({ isLoading: true, isError: false, isSuccess: false, message: "" });
+    try {
+      await api.post(`/userlists/${id}/review/reset`);
+      set({ isLoading: false, isSuccess: true });
+      return true;
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isLoading: false, isError: true, message });
+      return false;
+    }
+  },
+
   reset: () => {
     set({
       currentList: null,
+      dueCards: [],
+      reviewStats: null,
       isLoading: false,
       isError: false,
       isSuccess: false,

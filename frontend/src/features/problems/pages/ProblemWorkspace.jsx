@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import { Box, Tabs, Card, LoadingOverlay, useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -18,6 +18,7 @@ import CodeEditor from "../components/workspace/CodeEditor";
 import WorkspaceConsole from "../components/workspace/WorkspaceConsole";
 import EditorSettingsDrawer from "../components/workspace/EditorSettingsDrawer";
 import CodeViewerDrawer from "../components/workspace/CodeViewerDrawer";
+import ReviewBanner from "../../userlist/components/ReviewBanner";
 
 // Static Data / Utils
 import { templates } from "../data/templates";
@@ -26,6 +27,9 @@ const ProblemWorkspace = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { colorScheme } = useMantineColorScheme();
+  const [searchParams] = useSearchParams();
+  const deckId = searchParams.get("deck");
+  const [autoRevealSR, setAutoRevealSR] = useState(false);
 
   // Stores
   const {
@@ -145,6 +149,13 @@ const ProblemWorkspace = () => {
     }
   }, [isProblemError, problemMessage, isSubmissionError, submissionMessage]);
 
+  // Watch submission status to auto-reveal spaced repetition buttons
+  useEffect(() => {
+    if (submissionResult && submissionResult.status === "Accepted") {
+      setAutoRevealSR(true);
+    }
+  }, [submissionResult]);
+
   // Handle run solution
   const handleRun = () => {
     setConsoleTab("run");
@@ -186,8 +197,15 @@ const ProblemWorkspace = () => {
         onAddToList={() => setAddToListModalOpen(true)}
       />
 
+      {/* Review Active Study Deck Banner */}
+      {deckId && (
+        <Box px="md" mt="sm">
+          <ReviewBanner listId={deckId} problemId={id} autoReveal={autoRevealSR} />
+        </Box>
+      )}
+
       {/* Main Workspace Splitter */}
-      <Box style={{ flexGrow: 1, position: "relative", minHeight: 0 }} mt="sm">
+      <Box style={{ flexGrow: 1, position: "relative", minHeight: 0 }} mt={deckId ? "xs" : "sm"}>
         <LoadingOverlay visible={isProblemLoading} />
 
         {currentProblem && (

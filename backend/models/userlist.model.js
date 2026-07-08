@@ -23,6 +23,11 @@ const userListSchema = mongoose.Schema(
       default: false,
     },
 
+    spacedRepetitionEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
     problems: {
       type: [
         {

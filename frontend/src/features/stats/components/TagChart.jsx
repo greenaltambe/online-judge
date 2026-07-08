@@ -7,13 +7,12 @@ const getRateColor = (rate) => {
   return "teal";
 };
 
-const TagRow = ({ tag, displayMetric }) => {
+const TagRow = ({ tag, displayMetric, isLast }) => {
   return (
     <Box
       py="xs"
       style={{
-        borderBottom: "1px solid var(--mantine-color-default-border)",
-        "&:last-child": { borderBottom: "none" },
+        borderBottom: isLast ? "none" : "1px solid var(--mantine-color-default-border)",
       }}
     >
       <Group justify="space-between" mb={4}>
@@ -86,8 +85,8 @@ const TagChart = ({ tags }) => {
             </Box>
           ) : (
             <Box style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {mostSolved.map((tag) => (
-                <TagRow key={tag.tagId} tag={tag} displayMetric="solved" />
+              {mostSolved.map((tag, index) => (
+                <TagRow key={tag.tagId} tag={tag} displayMetric="solved" isLast={index === mostSolved.length - 1} />
               ))}
             </Box>
           )}
@@ -102,8 +101,8 @@ const TagChart = ({ tags }) => {
             </Box>
           ) : (
             <Box style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {weakest.map((tag) => (
-                <TagRow key={tag.tagId} tag={tag} displayMetric="rate" />
+              {weakest.map((tag, index) => (
+                <TagRow key={tag.tagId} tag={tag} displayMetric="rate" isLast={index === weakest.length - 1} />
               ))}
             </Box>
           )}

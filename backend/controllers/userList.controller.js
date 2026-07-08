@@ -78,3 +78,40 @@ export const importUserList = asyncHandler(async (req, res) => {
   const result = await userListService.importUserList(req.params.id, req.user._id);
   res.status(201).json(result);
 });
+
+// @desc    Get due cards for spaced repetition review
+// @route   GET /api/userlists/:id/review/due
+// @access  Private
+export const getDueCards = asyncHandler(async (req, res) => {
+  const result = await userListService.getDueCards(req.params.id, req.user._id);
+  res.status(200).json(result);
+});
+
+// @desc    Get spaced repetition statistics for a deck
+// @route   GET /api/userlists/:id/review/stats
+// @access  Private
+export const getReviewStats = asyncHandler(async (req, res) => {
+  const result = await userListService.getReviewStats(req.params.id, req.user._id);
+  res.status(200).json(result);
+});
+
+// @desc    Update review progress card (Anki SM-2 adjustment)
+// @route   POST /api/userlists/:id/review/:problemId
+// @access  Private
+export const updateReviewCard = asyncHandler(async (req, res) => {
+  const result = await userListService.updateReviewCard(
+    req.params.id,
+    req.params.problemId,
+    req.body.rating,
+    req.user._id
+  );
+  res.status(200).json(result);
+});
+
+// @desc    Reset spaced repetition progress for a deck
+// @route   POST /api/userlists/:id/review/reset
+// @access  Private
+export const resetReviewProgress = asyncHandler(async (req, res) => {
+  const result = await userListService.resetReviewProgress(req.params.id, req.user._id);
+  res.status(200).json(result);
+});

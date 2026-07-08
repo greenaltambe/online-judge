@@ -9,6 +9,7 @@ import ProblemWorkspace from "./features/problems/pages/ProblemWorkspace";
 import ProblemFormStepper from "./features/problems/pages/ProblemFormStepper";
 import UserListsPage from "./features/userlist/pages/UserListsPage";
 import UserListDetailsPage from "./features/userlist/pages/UserListDetailsPage";
+import ReviewPage from "./features/userlist/pages/ReviewPage";
 import StatsPage from "./features/stats/pages/StatsPage";
 
 // Guard for authenticated users
@@ -113,6 +114,17 @@ function App() {
           <ProtectedRoute>
             <Layout>
               <UserListDetailsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/userlists/:id/review"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ReviewPage />
             </Layout>
           </ProtectedRoute>
         }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Container, Title, Text, Button, Group, Grid, Card, Badge, ActionIcon, Stack, LoadingOverlay, Tooltip, Alert, Modal } from "@mantine/core";
-import { IconPlus, IconEdit, IconTrash, IconLock, IconWorld, IconBookmark, IconInfoCircle } from "@tabler/icons-react";
+import { Container, Title, Text, Button, Group, Grid, Card, Badge, ActionIcon, Stack, LoadingOverlay, Tooltip, Alert, Modal, Progress } from "@mantine/core";
+import { IconPlus, IconEdit, IconTrash, IconLock, IconWorld, IconBookmark, IconInfoCircle, IconBrain } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { useUserListStore } from "../../../stores/userListStore";
@@ -106,13 +106,25 @@ const UserListsPage = () => {
                 onClick={() => navigate(`/userlists/${list._id}`)}
               >
                 <Group justify="space-between" mb="xs">
-                  <Badge
-                    color={list.isPublic ? "green" : "blue"}
-                    variant="light"
-                    leftSection={list.isPublic ? <IconWorld size={12} /> : <IconLock size={12} />}
-                  >
-                    {list.isPublic ? "Public" : "Private"}
-                  </Badge>
+                  <Group gap={6}>
+                    <Badge
+                      color={list.isPublic ? "green" : "blue"}
+                      variant="light"
+                      leftSection={list.isPublic ? <IconWorld size={12} /> : <IconLock size={12} />}
+                    >
+                      {list.isPublic ? "Public" : "Private"}
+                    </Badge>
+
+                    {list.spacedRepetitionEnabled && (
+                      <Badge
+                        color="grape"
+                        variant="light"
+                        leftSection={<IconBrain size={12} />}
+                      >
+                        Deck
+                      </Badge>
+                    )}
+                  </Group>
 
                   <Group gap={6}>
                     <Tooltip label="Edit Details">
@@ -139,7 +151,7 @@ const UserListsPage = () => {
                 <Stack gap={8} style={{ flexGrow: 1 }} mt="xs">
                   <Group gap="xs" wrap="nowrap">
                     <IconBookmark size={20} style={{ color: "var(--mantine-color-blue-filled)" }} />
-                    <Title order={3} size="h4" truncate style={{ maxWidth: 220 }}>
+                    <Title order={3} size="h4" truncate="end" style={{ maxWidth: 220 }}>
                       {list.name}
                     </Title>
                   </Group>
@@ -147,6 +159,26 @@ const UserListsPage = () => {
                   <Text size="sm" c="dimmed" lineClamp={2} style={{ flexGrow: 1 }}>
                     {list.description}
                   </Text>
+
+                  {list.spacedRepetitionEnabled && list.srStats && (
+                    <Stack gap={4} mt="sm">
+                      <Group justify="space-between" align="center">
+                        <Text size="xs" fw={700} c="grape">
+                          Review Progress ({list.srStats.progressPercent}%)
+                        </Text>
+                        {list.srStats.dueTodayCount > 0 ? (
+                          <Badge color="red" size="xs" variant="filled">
+                            {list.srStats.dueTodayCount} due
+                          </Badge>
+                        ) : (
+                          <Badge color="gray" size="xs" variant="light">
+                            Caught up
+                          </Badge>
+                        )}
+                      </Group>
+                      <Progress color="grape" value={list.srStats.progressPercent} size="xs" radius="xl" />
+                    </Stack>
+                  )}
                 </Stack>
 
                 <Group justify="space-between" mt="lg" style={{ borderTop: "1px solid var(--mantine-color-default-border)", paddingTop: "12px" }}>

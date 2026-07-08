@@ -9,6 +9,7 @@ const CreateEditListModal = ({ opened, onClose, list = null }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
+  const [spacedRepetitionEnabled, setSpacedRepetitionEnabled] = useState(false);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -17,10 +18,12 @@ const CreateEditListModal = ({ opened, onClose, list = null }) => {
         setName(list.name || "");
         setDescription(list.description || "");
         setIsPublic(list.isPublic || false);
+        setSpacedRepetitionEnabled(list.spacedRepetitionEnabled || false);
       } else {
         setName("");
         setDescription("");
         setIsPublic(false);
+        setSpacedRepetitionEnabled(false);
       }
       setErrors({});
     }
@@ -53,6 +56,7 @@ const CreateEditListModal = ({ opened, onClose, list = null }) => {
       name: trimmedName,
       description: trimmedDesc,
       isPublic,
+      spacedRepetitionEnabled,
     };
 
     let success = false;
@@ -113,6 +117,13 @@ const CreateEditListModal = ({ opened, onClose, list = null }) => {
             description="Anyone logged in will be able to view public lists"
             checked={isPublic}
             onChange={(e) => setIsPublic(e.currentTarget.checked)}
+          />
+
+          <Switch
+            label="Enable Spaced Repetition"
+            description="Turn this list into an active study deck with Anki-style review schedules"
+            checked={spacedRepetitionEnabled}
+            onChange={(e) => setSpacedRepetitionEnabled(e.currentTarget.checked)}
           />
 
           <Group justify="end" mt="md">
